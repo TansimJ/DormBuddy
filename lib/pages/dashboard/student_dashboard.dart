@@ -1,3 +1,4 @@
+import 'package:dorm_buddy/pages/dashboard/student/viewproperty.dart';
 import 'package:flutter/material.dart';
 import './student/appbar.dart';
 import './student/bottombar.dart';
@@ -186,7 +187,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
   List<Widget> get _pages => [
         _buildHomePage(),
         const CommunityForum(),
-        const Placeholder(),
         const Placeholder(),
         const StudentProfilePage(),
       ];
