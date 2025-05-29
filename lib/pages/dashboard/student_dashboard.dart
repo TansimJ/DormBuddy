@@ -3,7 +3,7 @@ import './student/appbar.dart';
 import './student/bottombar.dart';
 import 'student/communityforum.dart';
 import './student/searchpage.dart';
-import './student/viewproperty.dart'; // <--- import your ViewPage
+import './student/profile.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -188,7 +188,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
         const CommunityForum(),
         const Placeholder(),
         const Placeholder(),
-        const Placeholder(),
+        const StudentProfilePage(),
       ];
 
   @override
