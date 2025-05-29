@@ -105,7 +105,9 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, 'edit_student'); // Navigate to edit profile page
+              },
               icon: const Icon(Icons.edit),
               label: const Text('Edit Profile'),
               style: ElevatedButton.styleFrom(
