@@ -3,6 +3,7 @@ import './student/appbar.dart';
 import './student/bottombar.dart';
 import './student/likes.dart';
 import './student/searchpage.dart';
+import './student/profile.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -155,7 +156,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
         const LikesPage(),
         const Placeholder(),
         const Placeholder(),
-        const Placeholder(),
+        const StudentProfilePage(),
       ];
 
   @override

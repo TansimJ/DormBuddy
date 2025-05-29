@@ -5,6 +5,7 @@ import 'pages/register/register_landlord_page.dart';
 import 'pages/dashboard/student_dashboard.dart';
 import 'pages/dashboard/landlord_dashboard.dart';
 import 'pages/forgot_password_page.dart';
+import 'pages/dashboard/student/profile.dart';
 
 void main() {
   runApp(const DormBuddyApp());
@@ -34,6 +35,8 @@ class DormBuddyApp extends StatelessWidget {
         '/landlord-dashboard': (context) => const LandlordDashboard(),
         '/forgot': (context) => const ForgotPasswordPage(),
         '/search': (context) => const StudentDashboard(),//temporary
+        '/profile': (context) => const StudentProfilePage(),
+
 
       },
     );
