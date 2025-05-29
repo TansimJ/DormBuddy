@@ -11,8 +11,9 @@ class LandlordDashboard extends StatefulWidget {
 
 class _LandlordDashboardState extends State<LandlordDashboard> {
   int _currentIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
 
-  final List<Map<String, dynamic>> properties = [
+  final List<Map<String, dynamic>> _allProperties = [
     {
       'image': 'https://via.placeholder.com/150',
       'name': 'Property Name 1',
@@ -22,10 +23,34 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     {
       'image': 'https://via.placeholder.com/150',
       'name': 'Property Name 2',
-      'address': 'Jalan Semarak, Kuala Lumpur',
+      'address': 'Jalan Tun Razak, Kuala Lumpur',
       'description': 'Modern twin bed room with KL city view',
     },
   ];
+
+  List<Map<String, dynamic>> _filteredProperties = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredProperties = List.from(_allProperties);
+    _searchController.addListener(_filterProperties);
+  }
+
+  void _filterProperties() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredProperties =
+          _allProperties.where((property) {
+            final name = property['name'].toLowerCase();
+            final address = property['address'].toLowerCase();
+            final description = property['description'].toLowerCase();
+            return name.contains(query) ||
+                address.contains(query) ||
+                description.contains(query);
+          }).toList();
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -60,17 +85,13 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
             const SizedBox(height: 24),
             _buildSearchBar(),
             const SizedBox(height: 24),
-            _buildPropertiesList(properties),
+            _buildPropertiesList(_filteredProperties),
           ],
         ),
       ),
       bottomNavigationBar: LandlordBottomBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onTap: _onItemTapped,
       ),
     );
   }
@@ -84,8 +105,8 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+        children: const [
+          Text(
             'Welcome User!',
             style: TextStyle(
               fontSize: 24,
@@ -93,12 +114,11 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
               color: Color(0xFF800000),
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             'Looking to list your property? Start here!',
             style: TextStyle(fontSize: 16),
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -106,8 +126,9 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
 
   Widget _buildSearchBar() {
     return TextField(
+      controller: _searchController,
       decoration: InputDecoration(
-        hintText: 'Search your properties...',
+        hintText: 'Search by name, address, or description...',
         prefixIcon: const Icon(Icons.search),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -194,24 +215,21 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF800000),
-                      ),
-                      onPressed: () {},
-                      child: const Text('Edit'),
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF800000),
-                      ),
-                      onPressed: () {},
-                      child: const Text('Update'),
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton(
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/delete_property',
+                          arguments: property,
+                        ).then((result) {
+                          if (result == true) {
+                            setState(() {
+                              _allProperties.remove(property);
+                              _filterProperties();
+                            });
+                          }
+                        });
+                      },
                       child: const Text('Delete'),
                     ),
                   ],
@@ -222,5 +240,11 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
