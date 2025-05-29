@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class LikesPage extends StatelessWidget {
-  const LikesPage({super.key});
+class CommunityForum extends StatelessWidget {
+  const CommunityForum({super.key});
 
 
 //PLACEHOLDER FOR NOW
@@ -9,12 +9,13 @@ class LikesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Liked Posts'),
+        title: const Text('Community Forum'),
         backgroundColor: const Color(0xFF800000),
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: Text(
-          'No liked posts yet.',
+          'Under Construction...',
           style: TextStyle(fontSize: 20, color: Colors.grey[600]),
         ),
       ),

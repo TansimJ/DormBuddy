@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import './student/appbar.dart';
 import './student/bottombar.dart';
-import './student/likes.dart';
+import 'student/communityforum.dart';
 import './student/searchpage.dart';
+import './student/viewproperty.dart'; // <--- import your ViewPage
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -21,21 +22,41 @@ class _StudentDashboardState extends State<StudentDashboard> {
         "name": "Sunny Apartment",
         "address": "123 College St, Apt 1",
         "price": 400,
+        "gender": "Any",
+        "dormType": "Studio",
+        "description": "A sunny and quiet place perfect for students.",
+        "postedBy": "Alice",
+        "ownerDescription": "Helpful and responsive landlord."
       },
       {
         "name": "Cassie Complex",
         "address": "456 College St, Apt 4",
         "price": 450,
+        "gender": "Women",
+        "dormType": "Shared",
+        "description": "Close to college and local stores.",
+        "postedBy": "Cassie",
+        "ownerDescription": "Available to assist tenants anytime."
       },
       {
         "name": "Ling Gan Studio",
         "address": "Linggangguli 1, Apt 3",
         "price": 500,
+        "gender": "Men",
+        "dormType": "Studio",
+        "description": "Modern amenities with peaceful environment.",
+        "postedBy": "Mr. Gan",
+        "ownerDescription": "Long-time property owner with good reviews."
       },
       {
         "name": "Windy Apartment",
         "address": "123 Ogga booga St, Apt 1",
         "price": 350,
+        "gender": "Any",
+        "dormType": "Studio",
+        "description": "Cool and breezy spot near campus.",
+        "postedBy": "Jane",
+        "ownerDescription": "Friendly host with fast response rate."
       },
     ];
 
@@ -93,52 +114,64 @@ class _StudentDashboardState extends State<StudentDashboard> {
             ),
             itemBuilder: (context, index) {
               final property = recentProperties[index];
-              return Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 100,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8),
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ViewPage(property: property),
+                    ),
+                  );
+                },
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 100,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ClipRRect(
+                                //adding an image
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.asset(
+                                  'lib/assets/images/property_outside.jpg', 
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                         ),
-                        child: const Center(
-                          child: Text(
-                            "Image",
-                            style: TextStyle(color: Colors.black54),
+                        const SizedBox(height: 8),
+                        Text(
+                          property['name'] as String,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        property['name'] as String,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          property['address'] as String,
+                          style: const TextStyle(fontSize: 12),
                         ),
-                      ),
-                      Text(
-                        property['address'] as String,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "\$${property['price']}/mo",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                        const Spacer(),
+                        Text(
+                          "RM${property['price']}/month",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -152,7 +185,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   List<Widget> get _pages => [
         _buildHomePage(),
-        const LikesPage(),
+        const CommunityForum(),
         const Placeholder(),
         const Placeholder(),
         const Placeholder(),

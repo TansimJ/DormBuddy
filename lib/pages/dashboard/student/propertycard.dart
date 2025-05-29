@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+
+
+//USELESS PAGE 
 class PropertyCard extends StatefulWidget {
   final String propertyName;
   final String address;
