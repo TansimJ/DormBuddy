@@ -5,6 +5,8 @@ import './student/bottombar.dart';
 import 'student/communityforum.dart';
 import './student/searchpage.dart';
 import './student/profile.dart';
+import './student/viewproperty.dart';
+import './student/chat.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -187,7 +189,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
   List<Widget> get _pages => [
         _buildHomePage(),
         const CommunityForum(),
-        const Placeholder(),
+        const ChatPage(),
+        
         const StudentProfilePage(),
       ];
 

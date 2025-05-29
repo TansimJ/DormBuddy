@@ -1,3 +1,5 @@
+import 'package:dorm_buddy/pages/dashboard/landlord/edit_profile_landlord.dart';
+import 'package:dorm_buddy/pages/dashboard/student/edit_student_profile.dart';
 import 'package:flutter/material.dart';
 import 'pages/login_page.dart';
 import 'pages/register/register_student_page.dart';
@@ -11,6 +13,7 @@ import 'pages/dashboard/landlord/add_dorm.dart';
 import 'pages/dashboard/landlord/landlord_chat.dart';
 import 'pages/dashboard/landlord/landlord_profile.dart';
 import 'pages/dashboard/landlord/delete_dorm.dart';
+
 
 
 void main() {
@@ -49,6 +52,8 @@ class DormBuddyApp extends StatelessWidget {
         '/landlord_chat': (context) => const LandlordChatPage(),
         '/landlord_profile': (context) => const LandlordProfilePage(),
         '/delete_property': (context) => const DeleteDormPage(),
+        'edit_landlord': (context) => const EditLandlordProfilePage(),
+        'edit_student': (context) => const EditStudentProfilePage(), 
 
       },
     );

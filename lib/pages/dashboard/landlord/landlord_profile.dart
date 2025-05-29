@@ -38,7 +38,7 @@ class _LandlordProfilePageState extends State<LandlordProfilePage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text('landlord@example.com'),
+            const Text('seancombs@example.com'),
             const SizedBox(height: 24),
             ListTile(
               leading: const Icon(Icons.phone, color: Color(0xFF800000)),
@@ -46,7 +46,7 @@ class _LandlordProfilePageState extends State<LandlordProfilePage> {
             ),
             ListTile(
               leading: const Icon(Icons.location_on, color: Color(0xFF800000)),
-              title: const Text('123 Main St, Cityville'),
+              title: const Text('123 Diddy St, Pville'),
             ),
             const Spacer(),
             ElevatedButton(
@@ -54,7 +54,10 @@ class _LandlordProfilePageState extends State<LandlordProfilePage> {
                 backgroundColor: const Color(0xFF800000),
                 minimumSize: const Size(double.infinity, 50),
               ),
-              onPressed: () {},
+              //add logic to lead to edit profile page
+              onPressed: () {
+                Navigator.pushNamed(context, 'edit_landlord'); // Navigate to edit profile page
+              },
               child: const Text('Edit Profile'),
             ),
           ],

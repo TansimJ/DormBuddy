@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import './appbar.dart';
-import './photogallery.dart'; // Make sure to import your gallery page
+import './photogallery.dart'; 
 
+//USELESS PAGE
 class ViewPage extends StatelessWidget {
   final Map<String, dynamic> property;
 
