@@ -16,6 +16,7 @@ class DormBuddyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // Disable debug banner
       title: 'DormBuddy',
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -32,6 +33,8 @@ class DormBuddyApp extends StatelessWidget {
         '/student-dashboard': (context) => const StudentDashboard(),
         '/landlord-dashboard': (context) => const LandlordDashboard(),
         '/forgot': (context) => const ForgotPasswordPage(),
+        '/search': (context) => const StudentDashboard(),//temporary
+
       },
     );
   }
