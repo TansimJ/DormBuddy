@@ -5,7 +5,13 @@ import 'pages/register/register_landlord_page.dart';
 import 'pages/dashboard/student_dashboard.dart';
 import 'pages/dashboard/landlord_dashboard.dart';
 import 'pages/forgot_password_page.dart';
+
 import 'pages/dashboard/student/profile.dart';
+import 'pages/dashboard/landlord/add_dorm.dart';
+import 'pages/dashboard/landlord/landlord_chat.dart';
+import 'pages/dashboard/landlord/landlord_profile.dart';
+import 'pages/dashboard/landlord/delete_dorm.dart';
+
 
 
 void main() {
@@ -35,9 +41,15 @@ class DormBuddyApp extends StatelessWidget {
         '/student-dashboard': (context) => const StudentDashboard(),
         '/landlord-dashboard': (context) => const LandlordDashboard(),
         '/forgot': (context) => const ForgotPasswordPage(),
+
         '/search': (context) => const StudentDashboard(),//temporary
         '/profile': (context) => const StudentProfilePage(),
 
+        '/landlord_dashboard': (context) => const LandlordDashboard(),
+        '/add_dorm': (context) => const AddDormPage(),
+        '/landlord_chat': (context) => const LandlordChatPage(),
+        '/landlord_profile': (context) => const LandlordProfilePage(),
+        '/delete_property': (context) => const DeleteDormPage(),
 
       },
     );
