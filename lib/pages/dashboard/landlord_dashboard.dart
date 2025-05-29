@@ -15,13 +15,13 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
 
   final List<Map<String, dynamic>> _allProperties = [
     {
-      'image': 'https://via.placeholder.com/150',
+      'image': 'lib/assets/images/property_outside.jpg',
       'name': 'Property Name 1',
       'address': 'Jalan Semarak, Kuala Lumpur',
       'description': 'Modern single room with KL city view',
     },
     {
-      'image': 'https://via.placeholder.com/150',
+      'image': 'lib/assets/images/property_outside.jpg',
       'name': 'Property Name 2',
       'address': 'Jalan Tun Razak, Kuala Lumpur',
       'description': 'Modern twin bed room with KL city view',
@@ -173,15 +173,14 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
       ),
       child: Column(
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              property['image'],
-              height: 180,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
+           ClipRRect(
+                                //adding an image
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.asset(
+                                  'lib/assets/images/property_outside.jpg', 
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
