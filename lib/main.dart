@@ -7,6 +7,7 @@ import 'pages/dashboard/landlord_dashboard.dart';
 import 'pages/forgot_password_page.dart';
 import 'pages/dashboard/student/profile.dart';
 
+
 void main() {
   runApp(const DormBuddyApp());
 }
