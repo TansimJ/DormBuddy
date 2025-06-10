@@ -1,3 +1,18 @@
+//Change #2
+buildscript{
+    repositories {
+        google()
+        Jcenter()
+    }
+}
+
+
+//change #1
+plugins{
+    id("com.google.gms.google-services") version "4.4.2" apply false
+}
+
+
 allprojects {
     repositories {
         google()

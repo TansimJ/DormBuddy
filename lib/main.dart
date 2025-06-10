@@ -1,5 +1,6 @@
 import 'package:dorm_buddy/pages/dashboard/landlord/edit_profile_landlord.dart';
 import 'package:dorm_buddy/pages/dashboard/student/edit_student_profile.dart';
+import 'package:firebase_core/firebase_core.dart'; //idk why this is needed but it is lol
 import 'package:flutter/material.dart';
 import 'pages/login_page.dart';
 import 'pages/register/register_student_page.dart';
@@ -15,8 +16,19 @@ import 'pages/dashboard/landlord/landlord_profile.dart';
 import 'pages/dashboard/landlord/delete_dorm.dart';
 
 
-
+//Change #6
 void main() {
+
+  Firebase.initializeApp(options:FirebaseOptions(
+    apiKey: "AIzaSyBt6DDn6jjAULlnvjLjczHLfBJSnK6iPyo",
+  authDomain: "dormbuddy-859e9.firebaseapp.com",
+  projectId: "dormbuddy-859e9",
+  storageBucket: "dormbuddy-859e9.firebasestorage.app",
+  messagingSenderId: "144123476622",
+  appId: "1:144123476622:web:b7c844e6ba7deff6f0a7df",
+  measurementId: "G-XHB59KM00L"
+   
+  ));
   runApp(const DormBuddyApp());
 }
 
