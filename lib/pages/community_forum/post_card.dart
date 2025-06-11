@@ -11,8 +11,10 @@ class PostCard extends StatelessWidget {
   final String content;
   final String author;
   final String date;
-  final List<String>? tags;// should rmeove 
+  final List<String>? tags;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   // --------------------------
   // Constructor
@@ -25,6 +27,8 @@ class PostCard extends StatelessWidget {
     required this.date,
     this.tags,
     this.onTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   // --------------------------
@@ -41,14 +45,34 @@ class PostCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --------------------------
-            // Title Section
+            // Title and menu row
             // --------------------------
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      onEdit?.call();
+                    } else if (value == 'delete') {
+                      onDelete?.call();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                    const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             

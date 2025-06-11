@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'post_card.dart';
 import 'post_details.dart';
+import 'createforumpost.dart';
+import 'editforumpost.dart';
 
 // Main Forum Page Widget
 class ForumPage extends StatefulWidget {
@@ -86,6 +88,43 @@ class _ForumPageState extends State<ForumPage> {
   }
 
   // --------------------------
+  // Edit and Delete Post Functions
+  // --------------------------
+  void _editPost(int index) async {
+    final post = filteredPosts[index];
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPostPage(
+          initialTitle: post.title,
+          initialContent: post.content,
+        ),
+      ),
+    );
+    if (result != null && result is Map) {
+      setState(() {
+        // Find the actual index in allPosts (in case of search filtering)
+        final realIndex = allPosts.indexOf(post);
+        if (realIndex != -1) {
+          allPosts[realIndex] = PostCard(
+            title: result['title'],
+            content: result['content'],
+            author: post.author,
+            date: post.date,
+          );
+        }
+      });
+    }
+  }
+
+  void _deletePost(int index) {
+    final post = filteredPosts[index];
+    setState(() {
+      allPosts.remove(post);
+    });
+  }
+
+  // --------------------------
   // Lifecycle Methods
   // --------------------------
   @override
@@ -147,8 +186,24 @@ class _ForumPageState extends State<ForumPage> {
       
       // Floating Action Button for creating new posts
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Implement create new post functionality
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreatePostPage()),
+          );
+          if (result != null && result is Map) {
+            setState(() {
+              allPosts.insert(
+                0,
+                PostCard(
+                  title: result['title'],
+                  content: result['content'],
+                  author: 'Anonymous', // Or get from user profile
+                  date: DateTime.now().toString().substring(0, 10),
+                ),
+              );
+            });
+          }
         },
         child: const Icon(Icons.add),
       ),
@@ -169,6 +224,8 @@ class _ForumPageState extends State<ForumPage> {
                   author: post.author,
                   date: post.date,
                   onTap: () => _navigateToPostDetail(post),
+                  onEdit: () => _editPost(index),
+                  onDelete: () => _deletePost(index),
                 );
               },
             ),

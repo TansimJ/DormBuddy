@@ -87,173 +87,170 @@ class _PostDetailPageState extends State<PostDetailPage> {
       ),
       
       // Body Layout
-      body: Column(
-        children: [
-          // Scrollable Content Area
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --------------------------
+              // Post Header Section
+              // --------------------------
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // --------------------------
-                  // Post Header Section
-                  // --------------------------
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        widget.post.author,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.post.date,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // --------------------------
-                  // Post Title Section
-                  // --------------------------
                   Text(
-                    widget.post.title,
+                    widget.post.author,
                     style: const TextStyle(
-                      fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // --------------------------
-                  // Post Content Section
-                  // --------------------------
                   Text(
-                    widget.post.content,
-                    style: const TextStyle(fontSize: 16),
+                    widget.post.date,
+                    style: const TextStyle(color: Colors.grey),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // --------------------------
-                  // Tags Section (if available)
-                  // --------------------------
-                  if (widget.post.tags != null && widget.post.tags!.isNotEmpty) ...[
-                    Wrap(
-                      spacing: 8,
-                      children: widget.post.tags!
-                          .map((tag) => Chip(
-                                label: Text(tag),
-                                backgroundColor: Colors.grey[200],
-                                labelStyle: const TextStyle(fontSize: 12),
-                              ))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                  
-                  // --------------------------
-                  // Comments Section Header
-                  // --------------------------
-                  const Divider(),
-                  const Text(
-                    'Comments',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  // --------------------------
-                  // Comments List
-                  // --------------------------
-                  if (_comments.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        'No comments yet. Be the first to comment!',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  else
-                    ..._comments.map((comment) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Comment Header
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    comment.author,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    comment.date,
-                                    style: const TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              // Comment Content
-                              Text(comment.content),
-                            ],
-                          ),
-                        )),
                 ],
               ),
-            ),
-          ),
-          
-          // --------------------------
-          // Comment Input Section
-          // --------------------------
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              border: Border(top: BorderSide(color: Colors.grey.shade300)),
-            ),
-            child: Row(
-              children: [
-                // Text Input Field
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: InputDecoration(
-                      hintText: 'Write a comment...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    minLines: 1,
-                    maxLines: 3,
-                  ),
+              const SizedBox(height: 16),
+              
+              // --------------------------
+              // Post Title Section
+              // --------------------------
+              Text(
+                widget.post.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 8),
-                // Send Button
-                IconButton(
-                  icon: Icon(Icons.send, color: Color(0xFF800000)),// color of send button 
-                  onPressed: _submitComment,
+              ),
+              const SizedBox(height: 16),
+              
+              // --------------------------
+              // Post Content Section
+              // --------------------------
+              Text(
+                widget.post.content,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              
+              // --------------------------
+              // Tags Section (if available)
+              // --------------------------
+              if (widget.post.tags != null && widget.post.tags!.isNotEmpty) ...[
+                Wrap(
+                  spacing: 8,
+                  children: widget.post.tags!
+                      .map((tag) => Chip(
+                            label: Text(tag),
+                            backgroundColor: Colors.grey[200],
+                            labelStyle: const TextStyle(fontSize: 12),
+                          ))
+                      .toList(),
                 ),
+                const SizedBox(height: 24),
               ],
-            ),
+              
+              // --------------------------
+              // Comments Section Header
+              // --------------------------
+              const Divider(),
+              const Text(
+                'Comments',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              // --------------------------
+              // Comments List
+              // --------------------------
+              if (_comments.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'No comments yet. Be the first to comment!',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                )
+              else
+                ..._comments.map((comment) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Comment Header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                comment.author,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                comment.date,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          // Comment Content
+                          Text(comment.content),
+                        ],
+                      ),
+                    )),
+            ],
           ),
-        ],
+        ),
+      ),
+      
+      // --------------------------
+      // Comment Input Section
+      // --------------------------
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            border: Border(top: BorderSide(color: Colors.grey.shade300)),
+          ),
+          child: Row(
+            children: [
+              // Text Input Field
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  decoration: InputDecoration(
+                    hintText: 'Write a comment...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  minLines: 1,
+                  maxLines: 3,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Send Button
+              IconButton(
+                icon: const Icon(Icons.send, color: Color(0xFF800000)),
+                onPressed: _submitComment,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
