@@ -1,25 +1,9 @@
 import 'package:flutter/material.dart';
 
-
-
-//USELESS PAGE 
 class PropertyCard extends StatefulWidget {
-  final String propertyName;
-  final String address;
-  final String postedBy;
-  final String description;
-  final String roomType; // Studio or Shared
-  final String genderPreference; // Male, Female, Any
+  final Map<String, dynamic> property;
 
-  const PropertyCard({
-    super.key,
-    required this.propertyName,
-    required this.address,
-    required this.postedBy,
-    required this.description,
-    required this.roomType,
-    required this.genderPreference,
-  });
+  const PropertyCard({super.key, required this.property});
 
   @override
   State<PropertyCard> createState() => _PropertyCardState();
@@ -30,6 +14,10 @@ class _PropertyCardState extends State<PropertyCard> {
 
   @override
   Widget build(BuildContext context) {
+    final property = widget.property;
+    final List images = (property['images'] is List) ? property['images'] : [];
+    final String? imageUrl = images.isNotEmpty ? images[0] : null;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
@@ -44,10 +32,12 @@ class _PropertyCardState extends State<PropertyCard> {
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               color: Colors.grey[300],
-              image: const DecorationImage(
-                image: AssetImage('assets/placeholder_property.jpg'),
-                fit: BoxFit.cover,
-              ),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: imageUrl != null
+                  ? Image.network(imageUrl, fit: BoxFit.cover)
+                  : Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover),
             ),
           ),
           Padding(
@@ -57,7 +47,7 @@ class _PropertyCardState extends State<PropertyCard> {
               children: [
                 // Property Name
                 Text(
-                  widget.propertyName,
+                  property['dormitory_name'] ?? 'No Name',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -66,7 +56,7 @@ class _PropertyCardState extends State<PropertyCard> {
                 const SizedBox(height: 4),
                 // Address
                 Text(
-                  widget.address,
+                  property['address_line'] ?? '',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -75,7 +65,7 @@ class _PropertyCardState extends State<PropertyCard> {
                 const SizedBox(height: 8),
                 // Description
                 Text(
-                  widget.description,
+                  property['description'] ?? '',
                   style: const TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 8),
@@ -85,14 +75,14 @@ class _PropertyCardState extends State<PropertyCard> {
                     Icon(Icons.home_work_outlined, size: 16, color: Colors.grey[700]),
                     const SizedBox(width: 4),
                     Text(
-                      widget.roomType,
+                      property['dormitory_type'] ?? '',
                       style: const TextStyle(fontSize: 13),
                     ),
                     const SizedBox(width: 16),
                     Icon(Icons.person_outline, size: 16, color: Colors.grey[700]),
                     const SizedBox(width: 4),
                     Text(
-                      widget.genderPreference,
+                      property['gender_preference'] ?? '',
                       style: const TextStyle(fontSize: 13),
                     ),
                   ],
@@ -103,7 +93,7 @@ class _PropertyCardState extends State<PropertyCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Posted By ${widget.postedBy}',
+                      'Posted By ${property['posted_by'] ?? 'Unknown'}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],

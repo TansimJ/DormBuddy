@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import './appbar.dart';
-import './photogallery.dart'; 
+import './photogallery.dart';
 
-//USELESS PAGE
 class ViewPage extends StatelessWidget {
   final Map<String, dynamic> property;
 
@@ -12,11 +11,15 @@ class ViewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Helper function to format price
     String formatPrice(dynamic price) {
-      if (price == null) return 'RM 650/month';
+      if (price == null) return 'RM -/month';
       if (price is int) return 'RM $price/month';
       if (price is double) return 'RM ${price.toStringAsFixed(2)}/month';
-      return price.toString();
+      return 'RM $price/month';
     }
+
+    // Get image list from Firestore
+    final List images = (property['images'] is List) ? property['images'] : [];
+    final String? mainImage = images.isNotEmpty ? images[0] : null;
 
     return Scaffold(
       appBar: const StudentNavBar(),
@@ -36,13 +39,12 @@ class ViewPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: ClipRRect(
-                                //adding an image
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'lib/assets/images/property_outside.jpg', 
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                    borderRadius: BorderRadius.circular(8),
+                    child: mainImage != null
+                        ? Image.network(mainImage, fit: BoxFit.cover)
+                        : Image.asset('lib/assets/images/property_outside.jpg',
+                            fit: BoxFit.cover),
+                  ),
                 ),
                 Positioned(
                   top: 12,
@@ -60,7 +62,7 @@ class ViewPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => PhotoGalleryPage(
-                            photos: property['photos'] ?? [],
+                            photos: images.cast<String>(),
                           ),
                         ),
                       );
@@ -82,7 +84,7 @@ class ViewPage extends StatelessWidget {
 
             // Property Name
             Text(
-              property['name']?.toString() ?? 'PROPERTY NAME',
+              property['dormitory_name']?.toString() ?? 'PROPERTY NAME',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -95,7 +97,7 @@ class ViewPage extends StatelessWidget {
             Row(
               children: [
                 Chip(
-                  label: Text("${property['gender'] ?? 'Women'}"),
+                  label: Text("${property['gender_preference'] ?? 'Any'}"),
                   backgroundColor: Colors.red.shade50,
                   shape: StadiumBorder(
                     side: BorderSide(color: Colors.red.shade200),
@@ -103,7 +105,7 @@ class ViewPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Chip(
-                  label: Text("${property['dormType'] ?? 'Studio'}"),
+                  label: Text("${property['dormitory_type'] ?? 'Studio'}"),
                   backgroundColor: Colors.red.shade50,
                   shape: StadiumBorder(
                     side: BorderSide(color: Colors.red.shade200),
@@ -121,7 +123,7 @@ class ViewPage extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    property['address']?.toString() ?? 'Property Location',
+                    property['address_line']?.toString() ?? 'Property Location',
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
@@ -130,7 +132,7 @@ class ViewPage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Posted by section
+            // Posted by section (show landlordId or a placeholder)
             RichText(
               text: TextSpan(
                 style: const TextStyle(
@@ -140,20 +142,14 @@ class ViewPage extends StatelessWidget {
                 children: [
                   const TextSpan(text: 'Posted by '),
                   TextSpan(
-                    text: property['postedBy']?.toString() ?? 'Jennie Kim.',
+                    text: property['landlordId']?.toString() ?? 'Unknown',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              property['ownerDescription']?.toString() ?? 'Small desc about Owner.',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-            ),
+            // You can add more owner info if you store it in Firestore
 
             const Divider(height: 40, thickness: 1),
 
@@ -167,7 +163,7 @@ class ViewPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              property['description']?.toString() ?? 'Default description text...',
+              property['description']?.toString() ?? 'No description provided.',
               style: const TextStyle(
                 fontSize: 16,
                 height: 1.5,
@@ -186,7 +182,7 @@ class ViewPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              formatPrice(property['price']),
+              formatPrice(property['monthly_rate_(rm)']),
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

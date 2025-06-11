@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'landlord/landlord_appbar.dart';
 import 'landlord/landlord_bottombar.dart';
 
@@ -85,7 +86,33 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
             const SizedBox(height: 24),
             _buildSearchBar(),
             const SizedBox(height: 24),
-            _buildPropertiesList(_filteredProperties),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('dorms').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Text('No properties found.');
+                }
+                // Convert Firestore docs to property maps
+                final properties = snapshot.data!.docs.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  data['id'] = doc.id;
+                  return data;
+                }).where((property) {
+                  final query = _searchController.text.toLowerCase();
+                  final name = (property['dormitory_name'] ?? '').toLowerCase();
+                  final address = (property['address_line'] ?? '').toLowerCase();
+                  final description = (property['description'] ?? '').toLowerCase();
+                  return name.contains(query) ||
+                      address.contains(query) ||
+                      description.contains(query);
+                }).toList();
+
+                return _buildPropertiesList(properties);
+              },
+            ),
           ],
         ),
       ),
@@ -159,6 +186,14 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
   }
 
   Widget _buildPropertyCard(Map<String, dynamic> property) {
+    // Use the first image if available, else a placeholder
+    String imageUrl = '';
+    if (property['images'] != null && property['images'] is List && property['images'].isNotEmpty) {
+      imageUrl = property['images'][0];
+    } else {
+      imageUrl = 'https://via.placeholder.com/150';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -176,7 +211,7 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             child: Image.network(
-              property['image'],
+              imageUrl,
               height: 180,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -188,7 +223,7 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  property['name'],
+                  property['dormitory_name'] ?? 'No Name',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -200,14 +235,14 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                     const Icon(Icons.location_on, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text(
-                      property['address'],
+                      property['address_line'] ?? '',
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  property['description'],
+                  property['description'] ?? '',
                   style: const TextStyle(color: Colors.black54),
                 ),
                 const SizedBox(height: 16),
