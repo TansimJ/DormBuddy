@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'post_card.dart';
 import 'post_details.dart';
 
+// Main Forum Page Widget
 class ForumPage extends StatefulWidget {
   const ForumPage({super.key});
 
@@ -9,7 +10,11 @@ class ForumPage extends StatefulWidget {
   State<ForumPage> createState() => _ForumPageState();
 }
 
+// Forum Page State
 class _ForumPageState extends State<ForumPage> {
+  // --------------------------
+  // Data Section
+  // --------------------------
   final List<PostCard> allPosts = [
     PostCard(
       title: 'Looking for a male student to rent together',
@@ -31,9 +36,13 @@ class _ForumPageState extends State<ForumPage> {
     ),
   ];
 
+  // --------------------------
+  // Search Functionality Section
+  // --------------------------
   final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
 
+  // Filter posts based on search query
   List<PostCard> get filteredPosts {
     if (searchQuery.isEmpty) return allPosts;
     
@@ -43,24 +52,55 @@ class _ForumPageState extends State<ForumPage> {
     }).toList();
   }
 
+  // --------------------------
+  // Navigation Section
+  // --------------------------
   void _navigateToPostDetail(PostCard post) {
+    // Sample comments for demonstration
+    List<Comment> comments = [];
+    
+    if (post.title.contains('first time living alone')) {
+      comments = [
+        Comment(
+          author: 'Leon Kennedy',
+          date: '29/05/2025',
+          content: 'Make sure not to tell strangers that you live alone.',
+        ),
+        Comment(
+          author: 'Nadeeya A.',
+          date: '29/05/2025',
+          content: 'Buy grocery after 9PM. Fresh food will be on sale.',
+        ),
+      ];
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PostDetailPage(post: post),
+        builder: (context) => PostDetailPage(
+          post: post,
+          initialComments: comments,
+        ),
       ),
     );
   }
 
+  // --------------------------
+  // Lifecycle Methods
+  // --------------------------
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
+  // --------------------------
+  // UI Building Section
+  // --------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App Bar with Search
       appBar: AppBar(
         title: const Text(
           'OUR FORUM',
@@ -104,12 +144,16 @@ class _ForumPageState extends State<ForumPage> {
           ),
         ),
       ),
+      
+      // Floating Action Button for creating new posts
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Implement create new post functionality
         },
         child: const Icon(Icons.add),
       ),
+      
+      // Main Content Body
       body: filteredPosts.isEmpty && searchQuery.isNotEmpty
           ? const Center(
               child: Text('No posts match your search'),
