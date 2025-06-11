@@ -39,6 +39,9 @@ class AuthService {
         'email': email.trim(),
         'role': role.trim(),
         'username': username.trim(),
+        'phone': '',      // Add empty phone
+        'address': '',    // Add empty address
+        'bio': '',        // Add empty bio
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -76,6 +79,17 @@ class AuthService {
       return userDoc['role']; //return user role
        } catch (e) {
       return e.toString();
+    }
+  }
+
+  Future<void> addMissingFieldsToAllUsers() async {
+    final users = await FirebaseFirestore.instance.collection('users').get();
+    for (var doc in users.docs) {
+      await doc.reference.set({
+        'phone': doc['phone'] ?? 'Insert phone number',
+        'address': doc['address'] ?? 'Insert address',
+        'bio': doc['bio'] ?? 'Insert Bio',
+      }, SetOptions(merge: true));
     }
   }
 }
