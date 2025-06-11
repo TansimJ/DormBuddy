@@ -1,6 +1,8 @@
+
 import 'package:dorm_buddy/pages/dashboard/landlord/edit_profile_landlord.dart';
 import 'package:dorm_buddy/pages/dashboard/student/edit_student_profile.dart';
 import 'package:firebase_core/firebase_core.dart'; //idk why this is needed but it is lol
+import 'package:flutter/foundation.dart';// this too
 import 'package:flutter/material.dart';
 import 'pages/login_page.dart';
 import 'pages/register/register_student_page.dart';
@@ -14,12 +16,18 @@ import 'pages/dashboard/landlord/add_dorm.dart';
 import 'pages/dashboard/landlord/landlord_chat.dart';
 import 'pages/dashboard/landlord/landlord_profile.dart';
 import 'pages/dashboard/landlord/delete_dorm.dart';
+import 'package:dorm_buddy/pages/community_forum/mainforum.dart'; // Import the main forum page
 
 
 //Change #6
-void main() {
+void main() async {
 
-  Firebase.initializeApp(options:FirebaseOptions(
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized before Firebase
+
+  // Initialize Firebase
+
+if (kIsWeb){
+  await Firebase.initializeApp(options:FirebaseOptions(
     apiKey: "AIzaSyBt6DDn6jjAULlnvjLjczHLfBJSnK6iPyo",
   authDomain: "dormbuddy-859e9.firebaseapp.com",
   projectId: "dormbuddy-859e9",
@@ -29,6 +37,10 @@ void main() {
   measurementId: "G-XHB59KM00L"
    
   ));
+}
+else{
+  Firebase.initializeApp();
+}
   runApp(const DormBuddyApp());
 }
 
@@ -66,6 +78,7 @@ class DormBuddyApp extends StatelessWidget {
         '/delete_property': (context) => const DeleteDormPage(),
         'edit_landlord': (context) => const EditLandlordProfilePage(),
         'edit_student': (context) => const EditStudentProfilePage(), 
+        '/forum': (context) => const ForumPage(), // Assuming you have a ForumPage
 
       },
     );

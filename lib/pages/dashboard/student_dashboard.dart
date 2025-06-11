@@ -1,7 +1,8 @@
+import 'package:dorm_buddy/pages/community_forum/mainforum.dart';//imported for the main forum page
 import 'package:flutter/material.dart';
-import './student/appbar.dart';
+import '../../widgets/appbar.dart';
 import './student/bottombar.dart';
-import 'student/communityforum.dart';
+//import 'student/communityforum.dart';
 import './student/searchpage.dart';
 import './student/profile.dart';
 import './student/viewproperty.dart';
@@ -187,7 +188,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   List<Widget> get _pages => [
         _buildHomePage(),
-        const CommunityForum(),
+        const ForumPage(),
         const ChatPage(),
         const StudentProfilePage(),
       ];

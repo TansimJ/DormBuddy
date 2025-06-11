@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './appbar.dart';
+import '../../../widgets/appbar.dart';
 import './photogallery.dart'; 
 
 //USELESS PAGE
