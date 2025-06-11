@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/dorm_buddy_logo.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -243,18 +244,58 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        final UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
 
-      if (mounted) {
+        if (userCredential.user != null) {
+          // Navigate to appropriate dashboard
+          if (mounted) {
+            setState(() => _isLoading = false);
+            Navigator.pushReplacementNamed(
+              context,
+              _isStudent ? '/student-dashboard' : '/landlord-dashboard',
+            );
+          }
+        }
+      } on FirebaseAuthException catch (e) {
         setState(() => _isLoading = false);
-        Navigator.pushReplacementNamed(
-          context,
-          _isStudent ? '/student-dashboard' : '/landlord-dashboard',
+        String errorMessage;
+
+        switch (e.code) {
+          case 'user-not-found':
+            errorMessage = 'No user found for that email.';
+            break;
+          case 'wrong-password':
+            errorMessage = 'Incorrect password.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'Invalid email address.';
+            break;
+          default:
+            errorMessage = 'Login failed. Please try again.';
+        }
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Login Error'),
+            content: Text(errorMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
         );
       }
     }
   }
+
 }
 
 class _UserTypeButton extends StatelessWidget {
