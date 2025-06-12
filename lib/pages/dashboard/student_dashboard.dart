@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import './student/appbar.dart';
 import './student/bottombar.dart';
-import 'student/communityforum.dart';
 import './student/searchpage.dart';
 import './student/profile.dart';
 import './student/viewproperty.dart';
 import './student/chat.dart';
+import '../community_forum/presentation/mainforum.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StudentDashboard extends StatefulWidget {
@@ -172,7 +172,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   List<Widget> get _pages => [
         _buildHomePage(),
-        const CommunityForum(),
+        ForumPage(),
         const ChatPage(),
         const StudentProfilePage(),
       ];

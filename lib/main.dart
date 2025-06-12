@@ -17,6 +17,8 @@ import 'pages/dashboard/landlord/landlord_chat.dart';
 import 'pages/dashboard/landlord/landlord_profile.dart';
 import 'pages/dashboard/landlord/delete_dorm.dart';
 
+import 'pages/community_forum/presentation/mainforum.dart';
+
 
 //Change #6
 void main() async {
