@@ -2,7 +2,7 @@
 //import 'package:dorm_buddy/pages/community_forum/post/presentation/pages/upload_post_page.dart';
 import 'package:dorm_buddy/pages/dashboard/landlord/edit_profile_landlord.dart';
 import 'package:dorm_buddy/pages/dashboard/student/edit_student_profile.dart';
-import 'package:firebase_core/firebase_core.dart'; //idk why this is needed but it is lol
+import 'package:firebase_core/firebase_core.dart'; 
 import 'package:flutter/foundation.dart';// this too
 import 'package:flutter/material.dart';
 import 'pages/login_page.dart';

@@ -1,10 +1,10 @@
+import 'package:dorm_buddy/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'post_card.dart';
 import 'post_details.dart';
 import 'createforumpost.dart';
 import 'editforumpost.dart';
 
-// Main Forum Page Widget
 class ForumPage extends StatefulWidget {
   const ForumPage({super.key});
 
@@ -12,11 +12,7 @@ class ForumPage extends StatefulWidget {
   State<ForumPage> createState() => _ForumPageState();
 }
 
-// Forum Page State
 class _ForumPageState extends State<ForumPage> {
-  // --------------------------
-  // Data Section
-  // --------------------------
   final List<PostCard> allPosts = [
     PostCard(
       title: 'Looking for a male student to rent together',
@@ -38,22 +34,157 @@ class _ForumPageState extends State<ForumPage> {
     ),
   ];
 
-  // --------------------------
-  // Search Functionality Section
-  // --------------------------
   final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
+  bool showMyPostsOnly = false;
 
-  // Filter posts based on search query
   List<PostCard> get filteredPosts {
-    if (searchQuery.isEmpty) return allPosts;
+    var posts = allPosts;
     
-    return allPosts.where((post) {
-      return post.title.toLowerCase().contains(searchQuery.toLowerCase()) || 
-             post.content.toLowerCase().contains(searchQuery.toLowerCase());
-    }).toList();
+    if (showMyPostsOnly) {
+      // Filter to show only current user's posts (replace 'Anonymous' with actual user ID)
+      posts = posts.where((post) => post.author == 'Anonymous').toList();
+    }
+    
+    if (searchQuery.isNotEmpty) {
+      posts = posts.where((post) {
+        return post.title.toLowerCase().contains(searchQuery.toLowerCase()) || 
+               post.content.toLowerCase().contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+    
+    return posts;
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Scaffold(
+     // appBar: const StudentNavBar(), idk why its showing up twice lol
+      body: Column(
+        children: [
+          // Custom Header Container
+          Container(
+            color: Color(0xFF800000), // Same as app bar color
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Column(
+              children: [
+                // Title
+                const Text(
+                  'OUR FORUM',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Search Bar
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: 'Search posts...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    suffixIcon: searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => searchQuery = '');
+                            },
+                          )
+                        : null,
+                  ),
+                  onChanged: (value) => setState(() => searchQuery = value),
+                ),
+                const SizedBox(height: 16),
+                
+                // Action Buttons Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.person),
+                      label: Text(showMyPostsOnly ? 'All Posts' : 'My Posts'),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: theme.primaryColor,
+                        backgroundColor: Colors.white,
+                      ),
+                      onPressed: () => setState(() => showMyPostsOnly = !showMyPostsOnly),
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.add),
+                      label: const Text('Create Post'),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: theme.primaryColor,
+                        backgroundColor: Colors.white,
+                      ),
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CreatePostPage()),
+                        );
+                        if (result != null && result is Map) {
+                          setState(() {
+                            allPosts.insert(
+                              0,
+                              PostCard(
+                                title: result['title'],
+                                content: result['content'],
+                                author: 'Anonymous',
+                                date: DateTime.now().toString().substring(0, 10),
+                              ),
+                            );
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Posts List
+          Expanded(
+            child: filteredPosts.isEmpty
+                ? Center(
+                    child: Text(
+                      searchQuery.isNotEmpty 
+                          ? 'No posts match your search' 
+                          : 'No posts available',
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: filteredPosts.length,
+                    separatorBuilder: (context, index) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final post = filteredPosts[index];
+                      return PostCard(
+                        title: post.title,
+                        content: post.content,
+                        author: post.author,
+                        date: post.date,
+                        onTap: () => _navigateToPostDetail(post),
+                        onEdit: () => _editPost(index),
+                        onDelete: () => _deletePost(index),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
   // --------------------------
   // Navigation Section
   // --------------------------
@@ -124,111 +255,4 @@ class _ForumPageState extends State<ForumPage> {
     });
   }
 
-  // --------------------------
-  // Lifecycle Methods
-  // --------------------------
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  // --------------------------
-  // UI Building Section
-  // --------------------------
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // App Bar with Search
-      appBar: AppBar(
-        title: const Text(
-          'OUR FORUM',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search posts...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                suffixIcon: searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            searchQuery = '';
-                          });
-                        },
-                      )
-                    : null,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-            ),
-          ),
-        ),
-      ),
-      
-      // Floating Action Button for creating new posts
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreatePostPage()),
-          );
-          if (result != null && result is Map) {
-            setState(() {
-              allPosts.insert(
-                0,
-                PostCard(
-                  title: result['title'],
-                  content: result['content'],
-                  author: 'Anonymous', // Or get from user profile
-                  date: DateTime.now().toString().substring(0, 10),
-                ),
-              );
-            });
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
-      
-      // Main Content Body
-      body: filteredPosts.isEmpty && searchQuery.isNotEmpty
-          ? const Center(
-              child: Text('No posts match your search'),
-            )
-          : ListView.separated(
-              itemCount: filteredPosts.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final post = filteredPosts[index];
-                return PostCard(
-                  title: post.title,
-                  content: post.content,
-                  author: post.author,
-                  date: post.date,
-                  onTap: () => _navigateToPostDetail(post),
-                  onEdit: () => _editPost(index),
-                  onDelete: () => _deletePost(index),
-                );
-              },
-            ),
-    );
-  }
 }
