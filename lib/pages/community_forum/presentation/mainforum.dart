@@ -5,6 +5,8 @@ import 'post_card.dart';
 import 'post_details.dart';
 import 'createforumpost.dart';
 import 'editforumpost.dart';
+//added by copilot
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForumPage extends StatefulWidget {
   const ForumPage({super.key});
@@ -21,6 +23,8 @@ class _ForumPageState extends State<ForumPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    //added by copilot
+    final currentUser = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
       body: Column(
@@ -81,8 +85,23 @@ class _ForumPageState extends State<ForumPage> {
                           context,
                           MaterialPageRoute(builder: (context) => const CreatePostPage()),
                         );
-                        // No setState needed, StreamBuilder will update automatically
+                     //copilot change
                       },
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: showMyPostsOnly ? Colors.white : theme.primaryColor,
+                        backgroundColor: showMyPostsOnly ? theme.primaryColor : Colors.white,
+                        side: BorderSide(
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          showMyPostsOnly = !showMyPostsOnly;
+                        });
+                      },
+                      child: Text(showMyPostsOnly ? 'Show All Posts' : 'Show My Posts'),
                     ),
                   ],
                 ),
@@ -108,15 +127,26 @@ class _ForumPageState extends State<ForumPage> {
                           'id': doc.id,
                           ...doc.data() as Map<String, dynamic>,
                         })
-                    .where((post) =>
-                        post['title']
-                            .toString()
-                            .toLowerCase()
-                            .contains(searchQuery.toLowerCase()) ||
-                        post['content']
-                            .toString()
-                            .toLowerCase()
-                            .contains(searchQuery.toLowerCase()))
+                    .where((post) {
+                      final matchesSearch = post['title']
+                              .toString()
+                              .toLowerCase()
+                              .contains(searchQuery.toLowerCase()) ||
+                          post['content']
+                              .toString()
+                              .toLowerCase()
+                              .contains(searchQuery.toLowerCase());
+
+                      // Debug print
+                      print('Current UID: $currentUser, Post userId: ${post['userId']}');
+
+                      final matchesUser = currentUser != null
+                          ? (showMyPostsOnly
+                              ? post['userId'].toString() == currentUser
+                              : true)
+                          : true;
+                      return matchesSearch && matchesUser;
+                    })
                     .toList();
 
                 if (posts.isEmpty) {
@@ -128,6 +158,8 @@ class _ForumPageState extends State<ForumPage> {
                   separatorBuilder: (context, index) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final post = posts[index];
+                    //added by copilot
+                    final isOwner = post['userId'] == currentUser;
                     return PostCard(
                       id: post['id'],
                       title: post['title'] ?? '',
@@ -135,30 +167,36 @@ class _ForumPageState extends State<ForumPage> {
                       author: post['author'] ?? '',
                       date: post['date'] ?? '',
                       onTap: () => _navigateToPostDetail(post),
-                      onEdit: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditPostPage(
-                              docId: post['id'], // Firestore doc id
-                              initialTitle: post['title'] ?? '',
-                              initialContent: post['content'] ?? '',
-                            ),
-                          ),
-                        );
-                        // Optionally show a snackbar if result == true
-                        if (result == true) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Post updated!')),
-                          );
-                        }
-                      },
-                      onDelete: () async {
-                        await FirebaseFirestore.instance
-                            .collection('forum')
-                            .doc(post['id'])
-                            .delete();
-                      },
+                     
+                     
+                    //added by copilot
+                      onEdit: isOwner
+                          ? () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditPostPage(
+                                    docId: post['id'],
+                                    initialTitle: post['title'] ?? '',
+                                    initialContent: post['content'] ?? '',
+                                  ),
+                                ),
+                              );
+                              if (result == true) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Post updated!')),
+                                );
+                              }
+                            }
+                          : null, // Only allow edit if owner
+                      onDelete: isOwner
+                          ? () async {
+                              await FirebaseFirestore.instance
+                                  .collection('forum')
+                                  .doc(post['id'])
+                                  .delete();
+                            }
+                          : null, // Only allow delete if owner
                     );
                   },
                 );

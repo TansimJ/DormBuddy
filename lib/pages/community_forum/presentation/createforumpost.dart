@@ -133,11 +133,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               final authorName = await _getAuthorName();
+              final user = FirebaseAuth.instance.currentUser;
               await FirebaseFirestore.instance.collection('forum').add({
                 'title': _titleController.text,
                 'content': _contentController.text,
                 'author': authorName,
                 'date': DateTime.now().toString().substring(0, 10),
+                'userId': user?.uid, // <-- Add this line
               });
               Navigator.pop(context);
             }

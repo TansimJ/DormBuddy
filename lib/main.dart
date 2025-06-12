@@ -24,27 +24,14 @@ import 'pages/community_forum/presentation/mainforum.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensures Flutter binding
   try {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-      runApp(const DormBuddyApp());
-    } catch (e, stackTrace) {
-      print("Firebase init failed: $e");
-      print(stackTrace);
-    }
-  await Firebase.initializeApp(
-    options: FirebaseOptions(
-      apiKey: "AIzaSyBt6DDn6jjAULlnvjLjczHLfBJSnK6iPyo",
-      authDomain: "dormbuddy-859e9.firebaseapp.com",
-      projectId: "dormbuddy-859e9",
-      storageBucket: "dormbuddy-859e9.appspot.com", // fixed .app -> .app**spot.com**
-      messagingSenderId: "144123476622",
-      appId: "1:144123476622:web:b7c844e6ba7deff6f0a7df",
-      measurementId: "G-XHB59KM00L",
-    ),
-  );
-
-  runApp(const DormBuddyApp());
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    runApp(const DormBuddyApp());
+  } catch (e, stackTrace) {
+    print("Firebase init failed: $e");
+    print(stackTrace);
+  }
 }
 
 class DormBuddyApp extends StatelessWidget {

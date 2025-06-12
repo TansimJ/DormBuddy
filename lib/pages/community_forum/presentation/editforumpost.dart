@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditPostPage extends StatefulWidget {
   final String docId; // <-- Add this
@@ -21,12 +22,28 @@ class _EditPostPageState extends State<EditPostPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _contentController;
+  //added by copilot
+  String? postOwnerId;
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.initialTitle);
     _contentController = TextEditingController(text: widget.initialContent);
+    //added by copilot
+    _fetchPostOwner();
+  }
+
+  Future<void> _fetchPostOwner() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('forum')
+        .doc(widget.docId)
+        .get();
+    setState(() {
+      postOwnerId = doc['userId'];
+      loading = false;
+    });
   }
 
   @override
@@ -68,6 +85,31 @@ class _EditPostPageState extends State<EditPostPage> {
 
   @override
   Widget build(BuildContext context) {
+    //added by copilot
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (postOwnerId != currentUserId) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF800000),
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text('Edit Post', style: TextStyle(color: Colors.white)),
+        ),
+        body: const Center(
+          child: Text(
+            "You are not allowed to edit this post.",
+            style: TextStyle(fontSize: 18, color: Colors.red),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       // AppBar with back button and maroon color
       appBar: AppBar(
