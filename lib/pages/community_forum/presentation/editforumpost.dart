@@ -45,7 +45,16 @@ class _EditPostPageState extends State<EditPostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Post')),
+      // AppBar with back button and maroon color
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF800000),
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          'Edit Post',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -54,22 +63,43 @@ class _EditPostPageState extends State<EditPostPage> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(
+                  hintText: 'Edit your title...',
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a title' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _contentController,
-                decoration: const InputDecoration(labelText: 'Content'),
                 maxLines: 5,
+                decoration: const InputDecoration(
+                  hintText: 'Edit your content...',
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter content' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _submit,
-                child: const Text('Save Changes'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF800000),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Save Changes',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ],
           ),
