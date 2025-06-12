@@ -15,10 +15,7 @@ class LandlordBottomBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: (index) {
-        // Call the parent's onTap first to update the UI
         onTap(index);
-        
-        // Then handle the navigation
         switch (index) {
           case 0:
             if (ModalRoute.of(context)?.settings.name != '/landlord_dashboard') {
@@ -56,9 +53,9 @@ class LandlordBottomBar extends StatelessWidget {
         }
       },
       type: BottomNavigationBarType.fixed,
-      backgroundColor: const Color(0xFF800000), 
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.white.withOpacity(0.6),
+      selectedItemColor: const Color(0xFF800000), // maroon
+      unselectedItemColor: Colors.grey,
+      showUnselectedLabels: true,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),

@@ -13,44 +13,12 @@ class LandlordDashboard extends StatefulWidget {
 class _LandlordDashboardState extends State<LandlordDashboard> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
-
-  final List<Map<String, dynamic>> _allProperties = [
-    {
-      'image': 'https://via.placeholder.com/150',
-      'name': 'Property Name 1',
-      'address': 'Jalan Semarak, Kuala Lumpur',
-      'description': 'Modern single room with KL city view',
-    },
-    {
-      'image': 'https://via.placeholder.com/150',
-      'name': 'Property Name 2',
-      'address': 'Jalan Tun Razak, Kuala Lumpur',
-      'description': 'Modern twin bed room with KL city view',
-    },
-  ];
-
-  List<Map<String, dynamic>> _filteredProperties = [];
+  String _searchQuery = "";
 
   @override
-  void initState() {
-    super.initState();
-    _filteredProperties = List.from(_allProperties);
-    _searchController.addListener(_filterProperties);
-  }
-
-  void _filterProperties() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredProperties =
-          _allProperties.where((property) {
-            final name = property['name'].toLowerCase();
-            final address = property['address'].toLowerCase();
-            final description = property['description'].toLowerCase();
-            return name.contains(query) ||
-                address.contains(query) ||
-                description.contains(query);
-          }).toList();
-    });
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
@@ -73,19 +41,26 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     }
   }
 
+  void _onSearch() {
+    setState(() {
+      _searchQuery = _searchController.text.trim().toLowerCase();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const LandlordAppBar(),
+      backgroundColor: const Color(0xFFF9F9F9),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildWelcomeSection(context),
+            _buildTopHeader(context),
             const SizedBox(height: 24),
-            _buildSearchBar(),
-            const SizedBox(height: 24),
+            _buildSearchBar(context),
+            const SizedBox(height: 18),
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('dorms').snapshots(),
               builder: (context, snapshot) {
@@ -93,21 +68,23 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Text('No properties found.');
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 40),
+                    child: Center(child: Text('No properties found.', style: TextStyle(fontSize: 16))),
+                  );
                 }
-                // Convert Firestore docs to property maps
                 final properties = snapshot.data!.docs.map((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   data['id'] = doc.id;
                   return data;
                 }).where((property) {
-                  final query = _searchController.text.toLowerCase();
+                  if (_searchQuery.isEmpty) return true;
                   final name = (property['dormitory_name'] ?? '').toLowerCase();
                   final address = (property['address_line'] ?? '').toLowerCase();
                   final description = (property['description'] ?? '').toLowerCase();
-                  return name.contains(query) ||
-                      address.contains(query) ||
-                      description.contains(query);
+                  return name.contains(_searchQuery) ||
+                      address.contains(_searchQuery) ||
+                      description.contains(_searchQuery);
                 }).toList();
 
                 return _buildPropertiesList(properties);
@@ -123,47 +100,76 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     );
   }
 
-  Widget _buildWelcomeSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF800000).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
-            'Welcome User!',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF800000),
-            ),
+  Widget _buildTopHeader(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Replace with landlord's profile image if available
+        CircleAvatar(
+          radius: 30,
+          backgroundColor: const Color(0xFF800000),
+          child: const Icon(Icons.person, size: 32, color: Colors.white),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Welcome, User!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF800000),
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Manage your properties easily and efficiently.',
+                style: TextStyle(fontSize: 15, color: Colors.black87),
+              ),
+            ],
           ),
-          SizedBox(height: 8),
-          Text(
-            'Looking to list your property? Start here!',
-            style: TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      decoration: InputDecoration(
-        hintText: 'Search by name, address, or description...',
-        prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+  Widget _buildSearchBar(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search by name, address, or description...',
+              prefixIcon: const Icon(Icons.search),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey[200],
+            ),
+            style: const TextStyle(fontSize: 15),
+            onSubmitted: (_) => _onSearch(),
+          ),
         ),
-        filled: true,
-        fillColor: Colors.grey[200],
-      ),
+        const SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: _onSearch,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF800000),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: const EdgeInsets.all(14),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            minimumSize: const Size(48, 48),
+          ),
+          child: const Icon(Icons.search, size: 22),
+        ),
+      ],
     );
   }
 
@@ -171,152 +177,252 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Your Properties',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF800000),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          child: Text(
+            'Your Properties',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF800000),
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-        ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
+        ListView.separated(
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: properties.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
           itemBuilder: (context, index) {
             final property = properties[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  '/delete_dorm',
-                  arguments: {
-                    ...property,
-                    'docId': property['id'],
-                  },
-                );
-              },
-              child: _buildPropertyCard(property),
-            );
+            return _buildPropertyCard(context, property);
           },
         ),
       ],
     );
   }
 
-  Widget _buildPropertyCard(Map<String, dynamic> property) {
-    // Use the first image if available, else a placeholder asset
-    String? imageUrl;
-    if (property['images'] != null && property['images'] is List && property['images'].isNotEmpty && property['images'][0] != null && property['images'][0].toString().isNotEmpty) {
-      imageUrl = property['images'][0];
-    } else {
-      imageUrl = null; // Will trigger asset fallback below
-    }
+  Widget _buildPropertyCard(BuildContext context, Map<String, dynamic> property) {
+    final String? imageUrl = (property['images'] is List && property['images'] != null && property['images'].isNotEmpty)
+        ? property['images'][0]
+        : null;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: imageUrl != null
-                ? Image.network(
-                    imageUrl,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'lib/assets/images/property_outside.jpg',
-                        height: 180,
-                        width: double.infinity,
+    return Material(
+      color: Colors.white,
+      elevation: 3,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/property_details',
+                arguments: property, // Pass the property map
+              );
+            },
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: imageUrl != null && imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        width: 110,
+                        height: 110,
                         fit: BoxFit.cover,
-                      );
-                    },
-                  )
-                : Image.asset(
-                    'lib/assets/images/property_outside.jpg',
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  property['dormitory_name'] ?? 'No Name',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'lib/assets/images/property_outside.jpg',
+                            width: 110,
+                            height: 110,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        'lib/assets/images/property_outside.jpg',
+                        width: 110,
+                        height: 110,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              const SizedBox(width: 16),
+              // Info and actions
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
+                    // Title and status
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            property['dormitory_name'] ?? 'No Name',
+                            style: const TextStyle(
+                                fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF800000)),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (property['status'] != null)
+                          Container(
+                            margin: const EdgeInsets.only(left: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: property['status'] == 'Available' ? Colors.green[100] : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: Text(
+                              property['status'] ?? '',
+                              style: TextStyle(
+                                color: property['status'] == 'Available' ? Colors.green : Colors.black54,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 15, color: Colors.grey),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            property['address_line'] ?? '',
+                            style: const TextStyle(fontSize: 13, color: Colors.black54),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
                     Text(
-                      property['address_line'] ?? '',
-                      style: const TextStyle(color: Colors.grey),
+                      property['description'] ?? '',
+                      style: const TextStyle(fontSize: 13, color: Colors.black87),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    // Extra info
+                    Row(
+                      children: [
+                        if (property['num_beds'] != null)
+                          Row(
+                            children: [
+                              const Icon(Icons.bed, size: 14, color: Colors.black54),
+                              Text(' ${property['num_beds']} ', style: const TextStyle(fontSize: 12)),
+                              const SizedBox(width: 6),
+                            ],
+                          ),
+                        if (property['num_baths'] != null)
+                          Row(
+                            children: [
+                              const Icon(Icons.bathtub, size: 14, color: Colors.black54),
+                              Text(' ${property['num_baths']} ', style: const TextStyle(fontSize: 12)),
+                              const SizedBox(width: 6),
+                            ],
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (property['monthly_rate_(rm)'] != null)
+                          Text(
+                            "RM${property['monthly_rate_(rm)']} /mo",
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        Row(
+                          children: [
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.edit, size: 16, color: Color(0xFF800000)),
+                              label: const Text('Edit', style: TextStyle(fontSize: 13, color: Color(0xFF800000))),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Color(0xFF800000)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                                minimumSize: const Size(38, 32),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              ),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/property_details',
+                                  arguments: property,
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 6),
+                            OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Colors.red),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                                minimumSize: const Size(38, 32),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              ),
+                              onPressed: () async {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Delete Property'),
+                                    content: const Text(
+                                        'Are you sure you want to delete this property? This action cannot be undone.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirmed == true) {
+                                  try {
+                                    await FirebaseFirestore.instance
+                                        .collection('dorms')
+                                        .doc(property['id'])
+                                        .delete();
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Property deleted successfully!')),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Delete failed: $e')),
+                                      );
+                                    }
+                                  }
+                                }
+                              },
+                              child: const Icon(Icons.delete, color: Colors.red, size: 18),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  property['description'] ?? '',
-                  style: const TextStyle(color: Colors.black54),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      onPressed: () async {
-                        try {
-                          await FirebaseFirestore.instance
-                              .collection('dorms')
-                              .doc(property['id'])
-                              .delete();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Property deleted successfully!')),
-                          );
-                        } catch (e) {
-                          print('Delete error: $e');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Delete failed: $e')),
-                          );
-                        }
-                      },
-                      child: const Text('Delete'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 }
