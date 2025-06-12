@@ -1,4 +1,4 @@
-import 'package:dorm_buddy/pages/community_forum/mainforum.dart';//imported for the main forum page
+import 'package:dorm_buddy/pages/community_forum/presentation/mainforum.dart';//imported for the main forum page
 import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import './student/bottombar.dart';

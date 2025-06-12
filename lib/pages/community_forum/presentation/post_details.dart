@@ -258,3 +258,40 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 }
+
+
+// ------------------------------
+//Convert post to json
+//-------------------------------
+Map<String, dynamic> postToJson(PostCard post) {
+  return {
+    'title': post.title,
+    'content': post.content,
+    'author': post.author,
+    'date': post.date, //might need to change to DateTime
+    'tags': post.tags ?? [],
+  };
+}
+
+//-------------------------------
+// Convert json to post
+//-------------------------------
+PostCard jsonToPost(Map<String, dynamic> json) {
+  return PostCard(
+    title: json['title'] as String,
+    content: json['content'] as String,
+    author: json['author'] as String,
+    date: json['date'] as String,); //highly likely that i will need to adjust this
+    }
+
+
+//-------------------------------
+// Convert comment to json
+//------------------------------- 
+Map<String, dynamic> commentToJson(Comment comment) {
+  return {
+    'author': comment.author,
+    'date': comment.date,
+    'content': comment.content,
+  };
+}

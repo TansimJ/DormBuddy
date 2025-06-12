@@ -1,4 +1,5 @@
 
+//import 'package:dorm_buddy/pages/community_forum/post/presentation/pages/upload_post_page.dart';
 import 'package:dorm_buddy/pages/dashboard/landlord/edit_profile_landlord.dart';
 import 'package:dorm_buddy/pages/dashboard/student/edit_student_profile.dart';
 import 'package:firebase_core/firebase_core.dart'; //idk why this is needed but it is lol
@@ -16,7 +17,7 @@ import 'pages/dashboard/landlord/add_dorm.dart';
 import 'pages/dashboard/landlord/landlord_chat.dart';
 import 'pages/dashboard/landlord/landlord_profile.dart';
 import 'pages/dashboard/landlord/delete_dorm.dart';
-import 'package:dorm_buddy/pages/community_forum/mainforum.dart'; // Import the main forum page
+import 'package:dorm_buddy/pages/community_forum/presentation/mainforum.dart'; // Import the main forum page
 
 
 //Change #6
@@ -79,6 +80,7 @@ class DormBuddyApp extends StatelessWidget {
         'edit_landlord': (context) => const EditLandlordProfilePage(),
         'edit_student': (context) => const EditStudentProfilePage(), 
         '/forum': (context) => const ForumPage(), // Assuming you have a ForumPage
+        //'/createPost': (context) => const CreatePostPage(), //Create post 
 
       },
     );

@@ -148,7 +148,7 @@ class _ForumPageState extends State<ForumPage> {
       // Floating Action Button for creating new posts
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Implement create new post functionality
+          Navigator.pushNamed(context, '/createPost');
         },
         child: const Icon(Icons.add),
       ),
