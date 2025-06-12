@@ -16,7 +16,11 @@ class _PropertyCardState extends State<PropertyCard> {
   Widget build(BuildContext context) {
     final property = widget.property;
     final List images = (property['images'] is List) ? property['images'] : [];
-    final String? imageUrl = images.isNotEmpty ? images[0] : null;
+    final String? imageUrl = (images.isNotEmpty && images[0] != null && images[0].toString().isNotEmpty)
+        ? images[0]
+        : null;
+
+    print('imageUrl: $imageUrl');
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -35,7 +39,7 @@ class _PropertyCardState extends State<PropertyCard> {
             ),
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: imageUrl != null
+              child: (imageUrl != null)
                   ? Image.network(imageUrl, fit: BoxFit.cover)
                   : Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover),
             ),

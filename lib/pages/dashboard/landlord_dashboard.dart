@@ -180,18 +180,38 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
           ),
         ),
         const SizedBox(height: 16),
-        ...properties.map((property) => _buildPropertyCard(property)).toList(),
+        ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: properties.length,
+          itemBuilder: (context, index) {
+            final property = properties[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/delete_dorm',
+                  arguments: {
+                    ...property,
+                    'docId': property['id'],
+                  },
+                );
+              },
+              child: _buildPropertyCard(property),
+            );
+          },
+        ),
       ],
     );
   }
 
   Widget _buildPropertyCard(Map<String, dynamic> property) {
-    // Use the first image if available, else a placeholder
-    String imageUrl = '';
-    if (property['images'] != null && property['images'] is List && property['images'].isNotEmpty) {
+    // Use the first image if available, else a placeholder asset
+    String? imageUrl;
+    if (property['images'] != null && property['images'] is List && property['images'].isNotEmpty && property['images'][0] != null && property['images'][0].toString().isNotEmpty) {
       imageUrl = property['images'][0];
     } else {
-      imageUrl = 'https://via.placeholder.com/150';
+      imageUrl = null; // Will trigger asset fallback below
     }
 
     return Container(
@@ -210,12 +230,27 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              imageUrl,
-              height: 180,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: imageUrl != null
+                ? Image.network(
+                    imageUrl,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'lib/assets/images/property_outside.jpg',
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  )
+                : Image.asset(
+                    'lib/assets/images/property_outside.jpg',
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -251,19 +286,21 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                   children: [
                     TextButton(
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/delete_property',
-                          arguments: property,
-                        ).then((result) {
-                          if (result == true) {
-                            setState(() {
-                              _allProperties.remove(property);
-                              _filterProperties();
-                            });
-                          }
-                        });
+                      onPressed: () async {
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection('dorms')
+                              .doc(property['id'])
+                              .delete();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Property deleted successfully!')),
+                          );
+                        } catch (e) {
+                          print('Delete error: $e');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Delete failed: $e')),
+                          );
+                        }
                       },
                       child: const Text('Delete'),
                     ),

@@ -1,7 +1,7 @@
 import 'package:dorm_buddy/services/auth.dart';
 import 'package:flutter/material.dart';
 import '../../../widgets/dorm_buddy_logo.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 class RegisterLandlordPage extends StatefulWidget {
   const RegisterLandlordPage({super.key});

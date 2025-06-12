@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/dorm_buddy_logo.dart';
 import '../../../services/auth.dart'; // <-- Make sure this path is correct
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 
 class RegisterStudentPage extends StatefulWidget {

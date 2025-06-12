@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import './appbar.dart';
 import './photogallery.dart';
 
@@ -20,6 +21,7 @@ class ViewPage extends StatelessWidget {
     // Get image list from Firestore
     final List images = (property['images'] is List) ? property['images'] : [];
     final String? mainImage = images.isNotEmpty ? images[0] : null;
+    final String landlordId = property['landlordId'] ?? '';
 
     return Scaffold(
       appBar: const StudentNavBar(),
@@ -132,24 +134,35 @@ class ViewPage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Posted by section (show landlordId or a placeholder)
-            RichText(
-              text: TextSpan(
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
-                children: [
-                  const TextSpan(text: 'Posted by '),
-                  TextSpan(
-                    text: property['landlordId']?.toString() ?? 'Unknown',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+            // Posted by section (show landlord name)
+            FutureBuilder<DocumentSnapshot>(
+              future: landlordId.isNotEmpty
+                  ? FirebaseFirestore.instance.collection('users').doc(landlordId).get()
+                  : Future.value(null),
+              builder: (context, snapshot) {
+                String landlordName = 'Unknown';
+                if (snapshot.connectionState == ConnectionState.done && snapshot.hasData && snapshot.data != null) {
+                  final data = snapshot.data!.data() as Map<String, dynamic>?;
+                  landlordName = data?['name'] ?? 'Unknown';
+                }
+                return RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Posted by '),
+                      TextSpan(
+                        text: landlordName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
             const SizedBox(height: 4),
-            // You can add more owner info if you store it in Firestore
 
             const Divider(height: 40, thickness: 1),
 

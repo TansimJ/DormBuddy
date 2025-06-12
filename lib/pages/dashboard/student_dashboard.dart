@@ -90,12 +90,11 @@ class _StudentDashboardState extends State<StudentDashboard> {
                 itemBuilder: (context, index) {
                   final property = properties[index];
                   // Use the first image if available, else a placeholder
-                  String imageUrl = '';
-                  if (property['images'] != null && property['images'] is List && property['images'].isNotEmpty) {
-                    imageUrl = property['images'][0];
-                  } else {
-                    imageUrl = 'https://via.placeholder.com/150';
-                  }
+                  final List images = (property['images'] is List) ? property['images'] : [];
+                  final String? imageUrl = (images.isNotEmpty && images[0] != null && images[0].toString().isNotEmpty)
+                      ? images[0]
+                      : null;
+
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -124,10 +123,15 @@ class _StudentDashboardState extends State<StudentDashboard> {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: imageUrl != null
+                                    ? Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover);
+                                        },
+                                      )
+                                    : Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover),
                               ),
                             ),
                             const SizedBox(height: 8),
