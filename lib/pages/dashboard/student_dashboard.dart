@@ -2,11 +2,12 @@ import 'package:dorm_buddy/pages/dashboard/student/viewproperty.dart';
 import 'package:flutter/material.dart';
 import './student/appbar.dart';
 import './student/bottombar.dart';
-import 'student/communityforum.dart';
 import './student/searchpage.dart';
 import './student/profile.dart';
 import './student/viewproperty.dart';
 import './student/chat.dart';
+import '../community_forum/presentation/mainforum.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -20,49 +21,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   // Dashboard Home Page (Search tab)
   Widget _buildHomePage() {
-    final recentProperties = [
-      {
-        "name": "Sunny Apartment",
-        "address": "123 College St, Apt 1",
-        "price": 400,
-        "gender": "Any",
-        "dormType": "Studio",
-        "description": "A sunny and quiet place perfect for students.",
-        "postedBy": "Alice",
-        "ownerDescription": "Helpful and responsive landlord."
-      },
-      {
-        "name": "Cassie Complex",
-        "address": "456 College St, Apt 4",
-        "price": 450,
-        "gender": "Women",
-        "dormType": "Shared",
-        "description": "Close to college and local stores.",
-        "postedBy": "Cassie",
-        "ownerDescription": "Available to assist tenants anytime."
-      },
-      {
-        "name": "Ling Gan Studio",
-        "address": "Linggangguli 1, Apt 3",
-        "price": 500,
-        "gender": "Men",
-        "dormType": "Studio",
-        "description": "Modern amenities with peaceful environment.",
-        "postedBy": "Mr. Gan",
-        "ownerDescription": "Long-time property owner with good reviews."
-      },
-      {
-        "name": "Windy Apartment",
-        "address": "123 Ogga booga St, Apt 1",
-        "price": 350,
-        "gender": "Any",
-        "dormType": "Studio",
-        "description": "Cool and breezy spot near campus.",
-        "postedBy": "Jane",
-        "ownerDescription": "Friendly host with fast response rate."
-      },
-    ];
-
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
       child: Column(
@@ -105,78 +63,105 @@ class _StudentDashboardState extends State<StudentDashboard> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: recentProperties.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.75,
-            ),
-            itemBuilder: (context, index) {
-              final property = recentProperties[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ViewPage(property: property),
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('dorms').orderBy('createdAt', descending: true).snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Text('No properties found.');
+              }
+              final properties = snapshot.data!.docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                data['id'] = doc.id;
+                return data;
+              }).toList();
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: properties.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.75,
+                ),
+                itemBuilder: (context, index) {
+                  final property = properties[index];
+                  // Use the first image if available, else a placeholder
+                  final List images = (property['images'] is List) ? property['images'] : [];
+                  final String? imageUrl = (images.isNotEmpty && images[0] != null && images[0].toString().isNotEmpty)
+                      ? images[0]
+                      : null;
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ViewPage(property: property),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 100,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: imageUrl != null
+                                    ? Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover);
+                                        },
+                                      )
+                                    : Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              property['dormitory_name'] ?? 'No Name',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              property['address_line'] ?? '',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            const Spacer(),
+                            Text(
+                              "RM${property['monthly_rate_(rm)'] ?? '-'} /month",
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   );
                 },
-                child: Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 100,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: ClipRRect(
-                                //adding an image
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'lib/assets/images/property_outside.jpg', 
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          property['name'] as String,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          property['address'] as String,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        const Spacer(),
-                        Text(
-                          "RM${property['price']}/month",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               );
             },
           ),
@@ -188,7 +173,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   List<Widget> get _pages => [
         _buildHomePage(),
-        const CommunityForum(),
+        ForumPage(),
         const ChatPage(),
         
         const StudentProfilePage(),

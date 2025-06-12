@@ -1,5 +1,7 @@
+import 'package:dorm_buddy/services/auth.dart';
 import 'package:flutter/material.dart';
 import '../../../widgets/dorm_buddy_logo.dart';
+
 
 class RegisterLandlordPage extends StatefulWidget {
   const RegisterLandlordPage({super.key});
@@ -9,12 +11,17 @@ class RegisterLandlordPage extends StatefulWidget {
 }
 
 class _RegisterLandlordPageState extends State<RegisterLandlordPage> {
+  
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+//added for auth
+  final _authService = AuthService();
+  String? _errorMessage;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +49,26 @@ class _RegisterLandlordPageState extends State<RegisterLandlordPage> {
                   color: Colors.grey[800],
                 ),
               ),
+
+
+
+                            
+                if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 12.0),
+                  child: CircularProgressIndicator(),
+                ),
+
+
+
               const SizedBox(height: 30),
               _buildTextField(
                 controller: _fullNameController,
@@ -131,15 +158,15 @@ class _RegisterLandlordPageState extends State<RegisterLandlordPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  
+
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Process registration
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/landlord-dashboard',
-                      );
+                      _registerLandlord(); // this will handle Firebase logic
                     }
                   },
+
+
                   child: const Text(
                     'Create Landlord Account',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -152,6 +179,40 @@ class _RegisterLandlordPageState extends State<RegisterLandlordPage> {
       ),
     );
   }
+
+//registration method
+  void _registerLandlord() async {
+  setState(() {
+    _isLoading = true;
+    _errorMessage = null;
+  });
+
+  final result = await _authService.signup(
+    name: _fullNameController.text.trim(),
+    email: _emailController.text.trim(),
+    username: _usernameController.text.trim(),
+    password: _passwordController.text.trim(),
+    role: 'landlord',
+  );
+
+  setState(() {
+    _isLoading = false;
+  });
+
+  if (result == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Registration successful!"))
+    );
+    // Success
+    Navigator.pushReplacementNamed(context, '/landlord-dashboard');
+  } else {
+    // Show error
+    setState(() {
+      _errorMessage = result;
+    });
+  }
+}
+
 
   Widget _buildTextField({
     required TextEditingController controller,
