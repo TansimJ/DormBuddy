@@ -135,7 +135,24 @@ class _ForumPageState extends State<ForumPage> {
                       author: post['author'] ?? '',
                       date: post['date'] ?? '',
                       onTap: () => _navigateToPostDetail(post),
-                      onEdit: null, // Implement edit if needed
+                      onEdit: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditPostPage(
+                              docId: post['id'], // Firestore doc id
+                              initialTitle: post['title'] ?? '',
+                              initialContent: post['content'] ?? '',
+                            ),
+                          ),
+                        );
+                        // Optionally show a snackbar if result == true
+                        if (result == true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Post updated!')),
+                          );
+                        }
+                      },
                       onDelete: () async {
                         await FirebaseFirestore.instance
                             .collection('forum')
