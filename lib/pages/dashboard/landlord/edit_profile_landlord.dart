@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditLandlordProfilePage extends StatefulWidget {
   const EditLandlordProfilePage({super.key});
@@ -10,13 +12,44 @@ class EditLandlordProfilePage extends StatefulWidget {
 class _EditLandlordProfilePageState extends State<EditLandlordProfilePage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _nameController = TextEditingController(text: 'Lucy Liu');
-  final TextEditingController _emailController = TextEditingController(text: 'lucyliu@example.com');
-  final TextEditingController _phoneController = TextEditingController(text: '+1 (123) 456-7890');
-  final TextEditingController _addressController = TextEditingController(text: '123 Main St, Cityville');
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
 
-  void _saveProfile() {
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final data = doc.data();
+    if (data != null) {
+      setState(() {
+        _nameController.text = data['name'] ?? '';
+        _emailController.text = data['email'] ?? '';
+        _phoneController.text = data['phone'] ?? '';
+        _addressController.text = data['address'] ?? '';
+      });
+    }
+  }
+
+  void _saveProfile() async {
     if (_formKey.currentState!.validate()) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'phone': _phoneController.text.trim(),
+          'address': _addressController.text.trim(),
+        }, SetOptions(merge: true));
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated')),
       );
@@ -70,10 +103,10 @@ class _EditLandlordProfilePageState extends State<EditLandlordProfilePage> {
                     backgroundColor: const Color(0xFF800000),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                   child: const Text(
-              'Save Profile',
-              style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-            ),
+                  child: const Text(
+                    'Save Profile',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],

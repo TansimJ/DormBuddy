@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'appbar.dart';
-import 'bottombar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StudentProfilePage extends StatefulWidget {
   const StudentProfilePage({super.key});
@@ -11,6 +11,14 @@ class StudentProfilePage extends StatefulWidget {
 
 class _StudentProfilePageState extends State<StudentProfilePage> {
   int _currentIndex = 3;
+
+  // Add these fields
+  String? name;
+  String? email;
+  String? phone;
+  String? address;
+  String? bio;
+  bool isLoading = true;
 
   void _onItemTapped(int index) {
     if (index == _currentIndex) return;
@@ -39,7 +47,33 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final data = doc.data();
+    setState(() {
+      name = data?['name'] ?? '';
+      email = data?['email'] ?? '';
+      phone = data?['phone'] ?? '';
+      address = data?['address'] ?? '';
+      bio = data?['bio'] ?? '';
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -51,14 +85,14 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             child: Icon(Icons.person, size: 50, color: Colors.white),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Student Name',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            name ?? 'Student Name',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'student@example.com',
-            style: TextStyle(color: Colors.grey),
+          Text(
+            email ?? 'student@example.com',
+            style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
 
@@ -72,26 +106,26 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
               child: Column(
                 children: [
                   Row(
-                    children: const [
-                      Icon(Icons.phone, color: Color(0xFF800000)),
-                      SizedBox(width: 16),
-                      Text('+1 (123) 456-7890'),
+                    children: [
+                      const Icon(Icons.phone, color: Color(0xFF800000)),
+                      const SizedBox(width: 16),
+                      Text(phone ?? ''),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Row(
-                    children: const [
-                      Icon(Icons.location_on, color: Color(0xFF800000)),
-                      SizedBox(width: 16),
-                      Expanded(child: Text('123 Main St, Cityville')),
+                    children: [
+                      const Icon(Icons.location_on, color: Color(0xFF800000)),
+                      const SizedBox(width: 16),
+                      Expanded(child: Text(address ?? '')),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
-                    children: const [
-                      Icon(Icons.comment, color: Color(0xFF800000)),
-                      SizedBox(width: 16),
-                      Expanded(child: Text('Looking for a room near campus. I am from the MJIIT faculty')),
+                    children: [
+                      const Icon(Icons.comment, color: Color(0xFF800000)),
+                      const SizedBox(width: 16),
+                      Expanded(child: Text(bio ?? '')),
                     ],
                   ),
                 ],
@@ -125,6 +159,4 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
       ),
     );
   }
-
-
 }

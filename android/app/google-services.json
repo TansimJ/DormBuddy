@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "144123476622",
+    "project_id": "dormbuddy-859e9",
+    "storage_bucket": "dormbuddy-859e9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144123476622:android:fe2a73ddf8948c5df0a7df",
+        "android_client_info": {
+          "package_name": "com.example.dormbuddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkJ87wO9l6rgqqpqJ6HX530gYp7crqNFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144123476622:android:fdc8745eba27cd2af0a7df",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkJ87wO9l6rgqqpqJ6HX530gYp7crqNFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

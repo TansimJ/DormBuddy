@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/dorm_buddy_logo.dart';
+import '../../../services/auth.dart'; // <-- Make sure this path is correct
+
+
 
 class RegisterStudentPage extends StatefulWidget {
   const RegisterStudentPage({super.key});
@@ -128,13 +131,41 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Process registration
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/student-dashboard',
+                      final authService = AuthService();
+
+                      String? result = await authService.signup(
+                        name: _fullNameController.text,
+                        email: _emailController.text,
+                        username: _usernameController.text,
+                        password: _passwordController.text,
+                        role: 'student', // hardcoded role
                       );
+
+                      if (result == null) {
+                        // Registration successful
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Student account created successfully!',
+                            ),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                        Navigator.pushReplacementNamed(
+                          context,
+                          '/student-dashboard',
+                        );
+                      } else {
+                        // Show error
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     }
                   },
                   child: const Text(
