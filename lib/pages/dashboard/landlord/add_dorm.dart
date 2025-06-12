@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'add_dorm_form.dart';
-import 'dart:io';
+import 'landlord_bottombar.dart';
 
 class AddDormPage extends StatefulWidget {
   const AddDormPage({super.key});
@@ -101,104 +101,38 @@ class _AddDormPageState extends State<AddDormPage> {
     }
   }
 
-  Widget _buildReviewCard() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
-              child: Text(
-                'Dormitory Listing Preview',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF800000),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (_selectedImages.isNotEmpty)
-              SizedBox(
-                height: 200,
-                child: PageView.builder(
-                  itemCount: _selectedImages.length,
-                  itemBuilder: (context, index) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(_selectedImages[index].path),
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(height: 20),
-            _buildReviewItem('Dormitory Name', formData['dormitory_name']),
-            _buildReviewItem('Type', formData['dormitory_type']),
-            _buildReviewItem('For', formData['gender_preference']),
-            _buildReviewItem('Address', formData['address_line']),
-            _buildReviewItem('City/State', '${formData['city']}, ${formData['state']}'),
-            _buildReviewItem('Distance to UTM', '${formData['distance_to_utm_kl_(km)']} km'),
-            _buildReviewItem('Monthly Rate', 'RM ${formData['monthly_rate_(rm)']}'),
-            _buildReviewItem('Deposit', 'RM ${formData['deposit_required_(rm)']}'),
-            const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: _submitForm,
-                child: const Text(
-                  'Submit Listing',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _onSectionChange(int section) {
+    setState(() {
+      _currentSection = section;
+    });
   }
 
-  Widget _buildReviewItem(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-          const Text(': ', style: TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(
-            child: Text(
-              value ?? 'Not specified',
-              style: TextStyle(
-                color: value == null ? Colors.grey : Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _setEditing(bool editing) {
+    setState(() {
+      _isEditing = editing;
+    });
+  }
+
+  int _bottomBarIndex = 1;
+  void _onBottomBarTap(int idx) {
+    setState(() {
+      _bottomBarIndex = idx;
+    });
+    // Navigation for bottom bar
+    switch (idx) {
+      case 0:
+        Navigator.pushNamed(context, '/landlord_dashboard');
+        break;
+      case 1:
+        // Already on add dorm
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/landlord_chat');
+        break;
+      case 3:
+        Navigator.pushNamed(context, '/landlord_profile');
+        break;
+    }
   }
 
   @override
@@ -206,46 +140,34 @@ class _AddDormPageState extends State<AddDormPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _isEditing ? 'Add New Dormitory' : 'Review Listing',
+          'Add New Dormitory',
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF800000),
         iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.white),
-              onPressed: () => setState(() {
-                _isEditing = true;
-                _currentSection = 1;
-              }),
-            ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            children: [
-              if (_isEditing)
-                AddDormForm(
-                  formKey: _formKey,
-                  formData: formData,
-                  selectedImages: _selectedImages,
-                  securityOptions: _securityOptions,
-                  roomTypes: _roomTypes,
-                  currentSection: _currentSection,
-                  onSectionChange: (section) => setState(() => _currentSection = section),
-                  isEditing: _isEditing,
-                  setEditing: (editing) => setState(() => _isEditing = editing),
-                )
-              else
-                _buildReviewCard(),
-            ],
+          child: AddDormForm(
+            formKey: _formKey,
+            formData: formData,
+            selectedImages: _selectedImages,
+            securityOptions: _securityOptions,
+            roomTypes: _roomTypes,
+            currentSection: _currentSection,
+            onSectionChange: _onSectionChange,
+            isEditing: _isEditing,
+            setEditing: _setEditing,
+            onSave: _submitForm, // This will be called from the review section button!
           ),
         ),
+      ),
+      bottomNavigationBar: LandlordBottomBar(
+        currentIndex: _bottomBarIndex,
+        onTap: _onBottomBarTap,
       ),
     );
   }
