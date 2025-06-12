@@ -38,15 +38,25 @@ class _EditPostPageState extends State<EditPostPage> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      // Update Firestore document
-      await FirebaseFirestore.instance
-          .collection('forum')
-          .doc(widget.docId)
-          .update({
-        'title': _titleController.text.trim(),
-        'content': _contentController.text.trim(),
-      });
-      Navigator.pop(context, true); // Return true to indicate success
+      try {
+        // Update Firestore document
+        await FirebaseFirestore.instance
+            .collection('forum')
+            .doc(widget.docId)
+            .update({
+          'title': _titleController.text.trim(),
+          'content': _contentController.text.trim(),
+        });
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update post: $e')),
+          );
+        }
+      }
     }
   }
 
@@ -142,4 +152,3 @@ class _EditPostPageState extends State<EditPostPage> {
     );
   }
 }
-
