@@ -1,4 +1,3 @@
-import 'package:dorm_buddy/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_card.dart';
@@ -207,6 +206,7 @@ class _ForumPageState extends State<ForumPage> {
       ),
     );
   }
+
 
   void _navigateToPostDetail(Map<String, dynamic> post) {
     Navigator.push(

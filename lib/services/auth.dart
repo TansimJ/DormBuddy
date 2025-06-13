@@ -1,5 +1,3 @@
-import 'dart:ui';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -33,6 +31,8 @@ class AuthService {
 
       print("Saving user data to Firestore...");
 
+// Write user data to Firestore
+//some of this is for profile
       await _firestore.collection("users").doc(userCredential.user!.uid).set({
         'uid': userCredential.user!.uid,
         'name': name.trim(),

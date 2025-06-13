@@ -46,6 +46,7 @@ class _EditPostPageState extends State<EditPostPage> {
     });
   }
 
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -85,7 +86,8 @@ class _EditPostPageState extends State<EditPostPage> {
 
   @override
   Widget build(BuildContext context) {
-    //added by copilot
+
+    // Check if the post owner ID matches the current user ID
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
     if (loading) {
@@ -102,8 +104,9 @@ class _EditPostPageState extends State<EditPostPage> {
           title: const Text('Edit Post', style: TextStyle(color: Colors.white)),
         ),
         body: const Center(
+          //testing lol
           child: Text(
-            "You are not allowed to edit this post.",
+            "CANNOT EDIT THIS BRO !!! STOP TRYING",
             style: TextStyle(fontSize: 18, color: Colors.red),
           ),
         ),
@@ -111,7 +114,7 @@ class _EditPostPageState extends State<EditPostPage> {
     }
 
     return Scaffold(
-      // AppBar with back button and maroon color
+      // AppBar 
       appBar: AppBar(
         backgroundColor: const Color(0xFF800000),
         iconTheme: const IconThemeData(color: Colors.white),

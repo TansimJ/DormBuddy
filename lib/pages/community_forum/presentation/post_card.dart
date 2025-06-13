@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+
+//This widget is used to display a post in the community forum.
+
+
 // --------------------------
 // Post Card Widget
 // --------------------------
