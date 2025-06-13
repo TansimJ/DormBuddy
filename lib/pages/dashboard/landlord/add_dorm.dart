@@ -16,7 +16,7 @@ class _AddDormPageState extends State<AddDormPage> {
   final _formKey = GlobalKey<FormState>();
   int _currentSection = 1;
   bool _isEditing = true;
-  List<XFile> _selectedImages = [];
+  final List<XFile> _selectedImages = [];
   final List<String> _securityOptions = ['CCTV', '24/7 Guards', 'Keycard Access'];
   final List<String> _roomTypes = ['Single', 'Twin', 'Double', 'Others'];
 

@@ -43,7 +43,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header with Maroon background
+            // Header 
             Container(
               color: const Color(0xFF800000),
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -90,8 +90,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Content Field - aligned to top
-                    Container(
+                    // Content Field 
+                    SizedBox(
                       height: 200,
                       child: TextFormField(
                         controller: _contentController,
@@ -117,7 +117,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 80), // Give some space above the button
+                    const SizedBox(height: 80), // Give some space above the button by adjusting this
                   ],
                 ),
               ),
@@ -134,12 +134,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
             if (_formKey.currentState!.validate()) {
               final authorName = await _getAuthorName();
               final user = FirebaseAuth.instance.currentUser;
+
+              // Add the post to Firestore
               await FirebaseFirestore.instance.collection('forum').add({
                 'title': _titleController.text,
                 'content': _contentController.text,
                 'author': authorName,
                 'date': DateTime.now().toString().substring(0, 10),
-                'userId': user?.uid, // <-- Add this line
+                'userId': user?.uid, // added userId field to track the author
               });
               Navigator.pop(context);
             }

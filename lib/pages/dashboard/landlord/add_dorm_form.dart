@@ -435,7 +435,7 @@ Widget _buildReviewSection() {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   width: 140,
                   child: Text(
                     _prettifyField(entry.key),
