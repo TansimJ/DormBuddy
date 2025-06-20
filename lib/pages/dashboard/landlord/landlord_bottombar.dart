@@ -14,44 +14,7 @@ class LandlordBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: currentIndex,
-      onTap: (index) {
-        onTap(index);
-        switch (index) {
-          case 0:
-            if (ModalRoute.of(context)?.settings.name != '/landlord_dashboard') {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/landlord_dashboard',
-                (route) => false,
-              );
-            }
-            break;
-          case 1:
-            if (ModalRoute.of(context)?.settings.name != '/add_dorm') {
-              Navigator.pushNamed(
-                context,
-                '/add_dorm',
-              );
-            }
-            break;
-          case 2:
-            if (ModalRoute.of(context)?.settings.name != '/landlord_chat') {
-              Navigator.pushNamed(
-                context,
-                '/landlord_chat',
-              );
-            }
-            break;
-          case 3:
-            if (ModalRoute.of(context)?.settings.name != '/landlord_profile') {
-              Navigator.pushNamed(
-                context,
-                '/landlord_profile',
-              );
-            }
-            break;
-        }
-      },
+      onTap: onTap, // Just change the tab index!
       type: BottomNavigationBarType.fixed,
       selectedItemColor: const Color(0xFF800000), // maroon
       unselectedItemColor: Colors.grey,

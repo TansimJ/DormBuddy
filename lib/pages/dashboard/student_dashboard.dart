@@ -4,9 +4,10 @@ import './student/appbar.dart';
 import './student/bottombar.dart';
 import './student/searchpage.dart';
 import './student/profile.dart';
-import './student/chat.dart';
 import '../community_forum/presentation/mainforum.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dorm_buddy/pages/chat/chat_list_page.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -63,7 +64,10 @@ class _StudentDashboardState extends State<StudentDashboard> {
           ),
           const SizedBox(height: 16),
           StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('dorms').orderBy('createdAt', descending: true).snapshots(),
+            stream: FirebaseFirestore.instance
+                .collection('dorms')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -89,7 +93,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
                 ),
                 itemBuilder: (context, index) {
                   final property = properties[index];
-                  // Use the first image if available, else a placeholder
                   final List images = (property['images'] is List) ? property['images'] : [];
                   final String? imageUrl = (images.isNotEmpty && images[0] != null && images[0].toString().isNotEmpty)
                       ? images[0]
@@ -127,11 +130,21 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                     ? Image.network(
                                         imageUrl,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover);
+                                        errorBuilder: (
+                                          context,
+                                          error,
+                                          stackTrace,
+                                        ) {
+                                          return Image.asset(
+                                            'lib/assets/images/property_outside.jpg',
+                                            fit: BoxFit.cover,
+                                          );
                                         },
                                       )
-                                    : Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover),
+                                    : Image.asset(
+                                        'lib/assets/images/property_outside.jpg',
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -170,16 +183,22 @@ class _StudentDashboardState extends State<StudentDashboard> {
     );
   }
 
-  List<Widget> get _pages => [
-        _buildHomePage(),
-        ForumPage(),
-        const ChatPage(),
-        
-        const StudentProfilePage(),
-      ];
-
   @override
   Widget build(BuildContext context) {
+    // Get the current Firebase user ID for chat
+    final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
+
+    // Pages for bottom navigation bar
+    final List<Widget> _pages = [
+      _buildHomePage(),
+      ForumPage(),
+      ChatListPage(
+        currentUserId: currentUserId,
+        currentUserRole: 'student',
+      ),
+      const StudentProfilePage(),
+    ];
+
     return Scaffold(
       appBar: const StudentNavBar(),
       body: _pages[_currentIndex],

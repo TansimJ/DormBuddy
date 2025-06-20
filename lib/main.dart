@@ -13,8 +13,8 @@ import 'pages/forgot_password_page.dart';
 
 import 'pages/dashboard/student/profile.dart';
 import 'pages/dashboard/landlord/add_dorm.dart';
-import 'pages/dashboard/landlord/landlord_chat.dart';
-import 'pages/dashboard/landlord/landlord_profile.dart';
+//import 'pages/dashboard/landlord/landlord_chat.dart';
+//import 'pages/dashboard/landlord/landlord_profile.dart';
 import 'pages/dashboard/landlord/delete_dorm.dart';
 
 
@@ -60,14 +60,16 @@ class DormBuddyApp extends StatelessWidget {
         '/search': (context) => const StudentDashboard(),//temporary
         '/profile': (context) => const StudentProfilePage(),
 
-        '/landlord_dashboard': (context) => const LandlordDashboard(),
+      //  '/landlord_dashboard': (context) => const LandlordDashboard(),
         '/property_details': (context) => const PropertyDetailsPage(),
         '/add_dorm': (context) => const AddDormPage(),
-        '/landlord_chat': (context) => const LandlordChatPage(),
-        '/landlord_profile': (context) => const LandlordProfilePage(),
+      //  '/landlord_chat': (context) => LandlordChatPage(),
+      //  '/landlord_profile': (context) => const LandlordProfilePage(),
         '/delete_property': (context) => const DeleteDormPage(),
         'edit_landlord': (context) => const EditLandlordProfilePage(),
         'edit_student': (context) => const EditStudentProfilePage(), 
+
+        
 
       },
     );
