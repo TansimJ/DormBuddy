@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './appbar.dart';
 import './photogallery.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dorm_buddy/pages/chat/chat_page.dart'; 
+import 'package:dorm_buddy/services/chat_service.dart';
 
 class ViewPage extends StatelessWidget {
   final Map<String, dynamic> property;
@@ -203,25 +206,53 @@ class ViewPage extends StatelessWidget {
             ),
             const SizedBox(height: 40),
             SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle chat action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                ),
-                child: const Text(
-                  'Chat Owner',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
+  width: double.infinity,
+  child: ElevatedButton(
+    onPressed: () async {
+      final studentId = FirebaseAuth.instance.currentUser?.uid;
+      final landlordId = property['landlordId'] ?? '';
+      final propertyId = property['id'] ?? ''; // Make sure property['id'] exists
+
+      if (studentId == null || landlordId.isEmpty || propertyId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not start chat. Missing user or property info.')),
+        );
+        return;
+      }
+
+      // Create or get chat room between this student, landlord and property
+      final chatService = ChatService();
+      final String chatRoomId = await chatService.getOrCreateChatRoom(
+        studentId: studentId,
+        landlordId: landlordId,
+        propertyId: propertyId,
+      );
+
+      // Navigate to the chat page for this room
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChatPage(
+            chatRoomId: chatRoomId,
+            currentUserId: studentId,
+          ),
+        ),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF800000),
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40),
+      ),
+    ),
+    child: const Text(
+      'Chat Owner',
+      style: TextStyle(fontSize: 16),
+    ),
+  ),
+),
           ],
         ),
       ),

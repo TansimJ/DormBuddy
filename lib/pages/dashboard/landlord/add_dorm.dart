@@ -3,7 +3,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'add_dorm_form.dart';
-import 'landlord_bottombar.dart';
 
 class AddDormPage extends StatefulWidget {
   const AddDormPage({super.key});
@@ -113,61 +112,26 @@ class _AddDormPageState extends State<AddDormPage> {
     });
   }
 
-  int _bottomBarIndex = 1;
-  void _onBottomBarTap(int idx) {
-    setState(() {
-      _bottomBarIndex = idx;
-    });
-    // Navigation for bottom bar
-    switch (idx) {
-      case 0:
-        Navigator.pushNamed(context, '/landlord_dashboard');
-        break;
-      case 1:
-        // Already on add dorm
-        break;
-      case 2:
-        Navigator.pushNamed(context, '/landlord_chat');
-        break;
-      case 3:
-        Navigator.pushNamed(context, '/landlord_profile');
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Add New Dormitory',
-          style: const TextStyle(color: Colors.white),
+    // NO Scaffold or BottomNavigationBar here!
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: AddDormForm(
+          formKey: _formKey,
+          formData: formData,
+          selectedImages: _selectedImages,
+          securityOptions: _securityOptions,
+          roomTypes: _roomTypes,
+          currentSection: _currentSection,
+          onSectionChange: _onSectionChange,
+          isEditing: _isEditing,
+          setEditing: _setEditing,
+          onSave: _submitForm,
         ),
-        backgroundColor: const Color(0xFF800000),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: AddDormForm(
-            formKey: _formKey,
-            formData: formData,
-            selectedImages: _selectedImages,
-            securityOptions: _securityOptions,
-            roomTypes: _roomTypes,
-            currentSection: _currentSection,
-            onSectionChange: _onSectionChange,
-            isEditing: _isEditing,
-            setEditing: _setEditing,
-            onSave: _submitForm, // This will be called from the review section button!
-          ),
-        ),
-      ),
-      bottomNavigationBar: LandlordBottomBar(
-        currentIndex: _bottomBarIndex,
-        onTap: _onBottomBarTap,
       ),
     );
   }
