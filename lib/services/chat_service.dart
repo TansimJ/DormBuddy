@@ -98,6 +98,26 @@ class ChatService {
     return docRef.id;
   }
 
+  Future<List<ChatMessage>> getMessagesOnce(String chatRoomId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .get();
+    return snapshot.docs
+        .map((doc) => ChatMessage.fromMap(doc.data(), doc.id))
+        .toList();
+  }
+
+  Future<void> markMessageAsRead(String chatRoomId, String messageId) async {
+    await FirebaseFirestore.instance
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .doc(messageId)
+        .update({'read': true});
+  }
+
   // When a new message is received:
   void onNewMessage(ChatMessage message) {
     // ...existing code to handle the message...

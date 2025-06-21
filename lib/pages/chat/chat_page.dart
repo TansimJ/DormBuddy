@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-
 import '../../models/chat_message.dart';
 import '../../services/chat_service.dart';
 import '../../widgets/chat_message_bubble.dart';
-import '../notification/chat_notification.dart';
-import '../dashboard/student/appbar.dart';
-import '../dashboard/student/bottombar.dart';
 
-
-class ChatPage extends StatefulWidget { // <--- Rename here
+class ChatPage extends StatefulWidget {
   final String chatRoomId;
   final String currentUserId;
 
@@ -19,10 +14,10 @@ class ChatPage extends StatefulWidget { // <--- Rename here
   });
 
   @override
-  State<ChatPage> createState() => _ChatPageState(); // <--- Rename state as well
+  State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> { // <--- And here
+class _ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
   final TextEditingController _controller = TextEditingController();
 
@@ -36,6 +31,21 @@ class _ChatPageState extends State<ChatPage> { // <--- And here
       );
       _controller.clear();
     }
+  }
+
+  void _markMessagesAsRead() async {
+    final messages = await _chatService.getMessagesOnce(widget.chatRoomId);
+    for (final msg in messages) {
+      if (msg.senderId != widget.currentUserId && (msg.read == false || msg.read == null)) {
+        await _chatService.markMessageAsRead(widget.chatRoomId, msg.id);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _markMessagesAsRead();
   }
 
   @override
@@ -86,7 +96,5 @@ class _ChatPageState extends State<ChatPage> { // <--- And here
         ),
       ),
     );
-    
   }
-
 }
