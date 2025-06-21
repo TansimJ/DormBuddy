@@ -20,215 +20,217 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF800000), // Primary maroon
-              Color(0xFFA52A2A), // Sienna
-              Color(0xFFCD5C5C), // Indian red
-            ],
-            stops: [0.1, 0.5, 0.9],
+      body: SafeArea( // <-- Wrap your main content with SafeArea
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF800000), // Primary maroon
+                Color(0xFFA52A2A), // Sienna
+                Color(0xFFCD5C5C), // Indian red
+              ],
+              stops: [0.1, 0.5, 0.9],
+            ),
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                // ignore: deprecated_member_use
-                shadowColor: Colors.black.withOpacity(0.3),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const DormBuddyLogo(),
-                        const SizedBox(height: 30),
-                        Text(
-                          'Welcome to DormBuddy',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[800],
-                            letterSpacing: 0.3,
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Card(
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  // ignore: deprecated_member_use
+                  shadowColor: Colors.black.withOpacity(0.3),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const DormBuddyLogo(),
+                          const SizedBox(height: 30),
+                          Text(
+                            'Welcome to DormBuddy',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[800],
+                              letterSpacing: 0.3,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Sign in as:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
+                          const SizedBox(height: 10),
+                          Text(
+                            'Sign in as:',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        // User Type Selection
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _UserTypeButton(
-                              icon: Icons.school,
-                              label: 'Student',
-                              isSelected: _isStudent,
-                              onTap: () => setState(() => _isStudent = true),
-                            ),
-                            const SizedBox(width: 20),
-                            _UserTypeButton(
-                              icon: Icons.home_work,
-                              label: 'Landlord',
-                              isSelected: !_isStudent,
-                              onTap: () => setState(() => _isStudent = false),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText:
-                                _isStudent
-                                    ? 'University Email'
-                                    : 'Business Email',
-                            labelStyle: TextStyle(color: Colors.grey[700]),
-                            prefixIcon: Icon(
-                              Icons.email_outlined,
-                              color: Colors.grey[700],
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey[400]!),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
+                          const SizedBox(height: 20),
+                          // User Type Selection
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _UserTypeButton(
+                                icon: Icons.school,
+                                label: 'Student',
+                                isSelected: _isStudent,
+                                onTap: () => setState(() => _isStudent = true),
+                              ),
+                              const SizedBox(width: 20),
+                              _UserTypeButton(
+                                icon: Icons.home_work,
+                                label: 'Landlord',
+                                isSelected: !_isStudent,
+                                onTap: () => setState(() => _isStudent = false),
+                              ),
+                            ],
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            return null;
-                          },
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 20),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            labelStyle: TextStyle(color: Colors.grey[700]),
-                            prefixIcon: Icon(
-                              Icons.lock_outline,
-                              color: Colors.grey[700],
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey[400]!),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
+                          const SizedBox(height: 30),
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: InputDecoration(
+                              labelText:
+                                  _isStudent
+                                      ? 'University Email'
+                                      : 'Business Email',
+                              labelStyle: TextStyle(color: Colors.grey[700]),
+                              prefixIcon: Icon(
+                                Icons.email_outlined,
                                 color: Colors.grey[700],
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 25),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF800000),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
+                              border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.grey[400]!),
                               ),
-                              elevation: 2,
+                              filled: true,
+                              fillColor: Colors.grey[50],
                             ),
-                            onPressed: _isLoading ? null : _handleLogin,
-                            child:
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              labelStyle: TextStyle(color: Colors.grey[700]),
+                              prefixIcon: Icon(
+                                Icons.lock_outline,
+                                color: Colors.grey[700],
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.grey[400]!),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[50],
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.grey[700],
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              if (value.length < 6) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 25),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF800000),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                elevation: 2,
+                              ),
+                              onPressed: _isLoading ? null : _handleLogin,
+                              child:
+                                  _isLoading
+                                      ? const CircularProgressIndicator(
+                                        color: Colors.white,
+                                      )
+                                      : const Text(
+                                        'Sign In',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          TextButton(
+                            onPressed:
                                 _isLoading
-                                    ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                    : const Text(
-                                      'Sign In',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        TextButton(
-                          onPressed:
-                              _isLoading
-                                  ? null
-                                  : () =>
-                                      Navigator.pushNamed(context, '/forgot'),
-                          child: Text(
-                            'Forgot Password?',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Need an account? ',
+                                    ? null
+                                    : () =>
+                                        Navigator.pushNamed(context, '/forgot'),
+                            child: Text(
+                              'Forgot Password?',
                               style: TextStyle(color: Colors.grey[700]),
                             ),
-                            TextButton(
-                              onPressed:
-                                  _isLoading
-                                      ? null
-                                      : () => Navigator.pushNamed(
-                                        context,
-                                        _isStudent
-                                            ? '/register/student'
-                                            : '/register/landlord',
-                                      ),
-                              child: Text(
-                                _isStudent ? 'Student' : 'Landlord',
-                                style: const TextStyle(
-                                  color: Color(0xFF800000),
-                                  fontWeight: FontWeight.w600,
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Need an account? ',
+                                style: TextStyle(color: Colors.grey[700]),
+                              ),
+                              TextButton(
+                                onPressed:
+                                    _isLoading
+                                        ? null
+                                        : () => Navigator.pushNamed(
+                                          context,
+                                          _isStudent
+                                              ? '/register/student'
+                                              : '/register/landlord',
+                                        ),
+                                child: Text(
+                                  _isStudent ? 'Student' : 'Landlord',
+                                  style: const TextStyle(
+                                    color: Color(0xFF800000),
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Text(
-                              ' Sign Up',
-                              style: TextStyle(color: Colors.grey[700]),
-                            ),
-                          ],
-                        ),
-                      ],
+                              Text(
+                                ' Sign Up',
+                                style: TextStyle(color: Colors.grey[700]),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

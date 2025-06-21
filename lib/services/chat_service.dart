@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dorm_buddy/pages/notification/chat_notification.dart';
 import '../models/chat_message.dart';
 import '../models/chat_room.dart';
 
@@ -71,7 +72,7 @@ class ChatService {
             .toList());
   }
 
-    Future<String> getOrCreateChatRoom({
+  Future<String> getOrCreateChatRoom({
     required String studentId,
     required String landlordId,
     required String propertyId,
@@ -95,5 +96,15 @@ class ChatService {
       'createdAt': FieldValue.serverTimestamp(),
     });
     return docRef.id;
+  }
+
+  // When a new message is received:
+  void onNewMessage(ChatMessage message) {
+    // ...existing code to handle the message...
+
+    ChatNotificationService.showChatNotification(
+      title: 'New message from ${message.senderId}',
+      body: message.text, // <-- changed from message.content to message.text
+    );
   }
 }

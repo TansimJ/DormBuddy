@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  flutter_local_notifications: ^17.1.2
 
   image_picker: ^1.1.2
   #Change 5
