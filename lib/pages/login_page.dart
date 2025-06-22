@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/dorm_buddy_logo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,11 +17,33 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   bool _isStudent = true;
   bool _isLoading = false;
+  bool _rememberMe = false; // <-- Added remember me variable
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedEmail();
+  }
+
+  Future<void> _loadRememberedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('remembered_email');
+    final savedPassword = prefs.getString('remembered_password');
+    if (savedEmail != null) {
+      _emailController.text = savedEmail;
+      setState(() {
+        _rememberMe = true;
+      });
+    }
+    if (savedPassword != null) {
+      _passwordController.text = savedPassword;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea( // <-- Wrap your main content with SafeArea
+      body: SafeArea( 
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -37,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Center(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                 child: Card(
                   elevation: 8,
                   shape: RoundedRectangleBorder(
@@ -46,14 +69,15 @@ class _LoginPageState extends State<LoginPage> {
                   // ignore: deprecated_member_use
                   shadowColor: Colors.black.withOpacity(0.3),
                   child: Padding(
-                    padding: const EdgeInsets.all(32.0),
+                    padding: const EdgeInsets.all(24.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center, 
                         children: [
                           const DormBuddyLogo(),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 20),
                           Text(
                             'Welcome to DormBuddy',
                             style: TextStyle(
@@ -119,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             keyboardType: TextInputType.emailAddress,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 15),
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
@@ -160,7 +184,30 @@ class _LoginPageState extends State<LoginPage> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 25),
+                          const SizedBox(height: 15),
+                          // Remember Me Checkbox
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _rememberMe,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _rememberMe = value ?? false;
+                                  });
+                                },
+                                activeColor: const Color(0xFF800000),
+                                checkColor: Colors.white,
+                              ),
+                              const Text(
+                                'Remember Me',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color.fromARGB(255, 0, 0, 0),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
@@ -185,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                             ),
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 8),
                           TextButton(
                             onPressed:
                                 _isLoading
@@ -197,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(color: Colors.grey[700]),
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 6),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -252,6 +299,16 @@ class _LoginPageState extends State<LoginPage> {
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
+
+        // Save or clear email based on Remember Me
+        final prefs = await SharedPreferences.getInstance();
+        if (_rememberMe) {
+          await prefs.setString('remembered_email', _emailController.text.trim());
+          await prefs.setString('remembered_password', _passwordController.text); // Not secure!
+        } else {
+          await prefs.remove('remembered_email');
+          await prefs.remove('remembered_password');
+        }
 
         if (userCredential.user != null) {
           // Navigate to appropriate dashboard

@@ -140,7 +140,7 @@ class _ChatListPageState extends State<ChatListPage> {
                                   // Only show notification if this unread message hasn't been notified yet in this session
                                   if (_lastNotifiedMessageId[room.id] != latestUnreadMessageId) {
                                     _lastNotifiedMessageId[room.id] = latestUnreadMessageId;
-                                    _saveLastNotifiedMessageId(room.id, latestUnreadMessageId!);
+                                    _saveLastNotifiedMessageId(room.id, latestUnreadMessageId);
                                     ChatNotificationService.showChatNotification(
                                       title: 'New message from $displayName',
                                       body: latestUnreadMessage.text,
