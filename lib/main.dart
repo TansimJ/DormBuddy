@@ -68,8 +68,8 @@ class DormBuddyApp extends StatelessWidget {
         //  '/landlord_chat': (context) => LandlordChatPage(),
         //  '/landlord_profile': (context) => const LandlordProfilePage(),
         '/delete_property': (context) => const DeleteDormPage(),
-        '/edit_landlord': (context) => const EditLandlordProfilePage(),
-        '/edit_student': (context) => const EditStudentProfilePage(),
+        'edit_landlord': (context) => const EditLandlordProfilePage(),
+        'edit_student': (context) => const EditStudentProfilePage(),
       },
     );
   }

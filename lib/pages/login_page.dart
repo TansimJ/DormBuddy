@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/dorm_buddy_logo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -300,6 +301,13 @@ class _LoginPageState extends State<LoginPage> {
           password: _passwordController.text.trim(),
         );
 
+        // Fetch user role from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+        final userRole = userDoc.data()?['role'];
+
         // Save or clear email based on Remember Me
         final prefs = await SharedPreferences.getInstance();
         if (_rememberMe) {
@@ -310,8 +318,15 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.remove('remembered_password');
         }
 
-        if (userCredential.user != null) {
-          // Navigate to appropriate dashboard
+        // Role-based navigation and restriction
+        if (userRole == null) {
+          throw FirebaseAuthException(
+            code: 'role-not-found',
+            message: 'User role not found. Please contact support.',
+          );
+        }
+
+        if ((_isStudent && userRole == 'student') || (!_isStudent && userRole == 'landlord')) {
           if (mounted) {
             setState(() => _isLoading = false);
             Navigator.pushReplacementNamed(
@@ -319,6 +334,25 @@ class _LoginPageState extends State<LoginPage> {
               _isStudent ? '/student-dashboard' : '/landlord-dashboard',
             );
           }
+        } else {
+          setState(() => _isLoading = false);
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Login Error'),
+              content: Text(
+                _isStudent
+                  ? 'This account is registered as a landlord. Please use the landlord login.'
+                  : 'This account is registered as a student. Please use the student login.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
         }
       } on FirebaseAuthException catch (e) {
         setState(() => _isLoading = false);
@@ -333,6 +367,9 @@ class _LoginPageState extends State<LoginPage> {
             break;
           case 'invalid-email':
             errorMessage = 'Invalid email address.';
+            break;
+          case 'role-not-found':
+            errorMessage = e.message ?? 'User role not found.';
             break;
           default:
             errorMessage = 'Login failed. Please try again.';
