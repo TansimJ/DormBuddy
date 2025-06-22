@@ -57,6 +57,7 @@ class ChatService {
       'senderId': senderId,
       'text': message,
       'timestamp': FieldValue.serverTimestamp(),
+      'read': false, // <-- Add this line!
     });
   }
 

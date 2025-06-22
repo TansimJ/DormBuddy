@@ -22,6 +22,7 @@ class ChatMessage {
       senderId: map['senderId'],
       text: map['text'],
       timestamp: map['timestamp'],
+      read: map['read'] is bool ? map['read'] : false, 
     );
   }
 
