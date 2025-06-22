@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dorm_buddy/pages/notification/chat_notification.dart';
 import '../models/chat_message.dart';
 import '../models/chat_room.dart';
 
@@ -27,6 +26,7 @@ class ChatService {
         'landlordId': landlordId,
         'studentId': studentId,
         'propertyId': propertyId,
+        'createdAt': FieldValue.serverTimestamp(),
       });
       return docRef.id;
     }
@@ -47,8 +47,12 @@ class ChatService {
   Future<void> sendMessage({
     required String chatRoomId,
     required String senderId,
+    required String recipientId,   // <-- Pass this when calling
+    required String senderName,     // <-- Pass this when calling
     required String message,
+    String? propertyId,             // <-- optional
   }) async {
+    // Send the chat message
     await _firestore
         .collection('chat_rooms')
         .doc(chatRoomId)
@@ -57,7 +61,22 @@ class ChatService {
       'senderId': senderId,
       'text': message,
       'timestamp': FieldValue.serverTimestamp(),
-      'read': false, // <-- Add this line!
+      'read': false,
+    });
+
+    // Also create a notification for the recipient
+    await _firestore
+        .collection('users')
+        .doc(recipientId)
+        .collection('notifications')
+        .add({
+      'type': 'message',
+      'title': 'New message from $senderName',
+      'body': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'isRead': false,
+      'chatRoomId': chatRoomId,
+      if (propertyId != null) 'propertyId': propertyId,
     });
   }
 
@@ -78,7 +97,7 @@ class ChatService {
     required String landlordId,
     required String propertyId,
   }) async {
-    final chatRooms = await FirebaseFirestore.instance
+    final chatRooms = await _firestore
         .collection('chat_rooms')
         .where('studentId', isEqualTo: studentId)
         .where('landlordId', isEqualTo: landlordId)
@@ -90,7 +109,7 @@ class ChatService {
     }
 
     // Create new chat room
-    final docRef = await FirebaseFirestore.instance.collection('chat_rooms').add({
+    final docRef = await _firestore.collection('chat_rooms').add({
       'studentId': studentId,
       'landlordId': landlordId,
       'propertyId': propertyId,
@@ -100,7 +119,7 @@ class ChatService {
   }
 
   Future<List<ChatMessage>> getMessagesOnce(String chatRoomId) async {
-    final snapshot = await FirebaseFirestore.instance
+    final snapshot = await _firestore
         .collection('chat_rooms')
         .doc(chatRoomId)
         .collection('messages')
@@ -111,21 +130,11 @@ class ChatService {
   }
 
   Future<void> markMessageAsRead(String chatRoomId, String messageId) async {
-    await FirebaseFirestore.instance
+    await _firestore
         .collection('chat_rooms')
         .doc(chatRoomId)
         .collection('messages')
         .doc(messageId)
         .update({'read': true});
-  }
-
-  // When a new message is received:
-  void onNewMessage(ChatMessage message) {
-    // ...existing code to handle the message...
-
-    ChatNotificationService.showChatNotification(
-      title: 'New message from ${message.senderId}',
-      body: message.text, // <-- changed from message.content to message.text
-    );
   }
 }

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import './appbar.dart';
 import './photogallery.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:dorm_buddy/pages/chat/chat_page.dart'; 
+import 'package:dorm_buddy/pages/chat/chat_page.dart';
 import 'package:dorm_buddy/services/chat_service.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -29,7 +29,7 @@ class ViewPage extends StatelessWidget {
 
     return Scaffold(
       appBar: const StudentNavBar(),
-      body: SafeArea( // <-- Wrap the body in SafeArea
+      body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -234,15 +234,16 @@ class ViewPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     final studentId = FirebaseAuth.instance.currentUser?.uid;
-                    final landlordId = property['landlordId'] ?? '';
-                    final propertyId = property['id'] ?? ''; // Make sure property['id'] exists
-
+                    final propertyId = property['id'] ?? '';
                     if (studentId == null || landlordId.isEmpty || propertyId.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Could not start chat. Missing user or property info.')),
                       );
                       return;
                     }
+                    // Fetch sender (student) name from Firestore
+                    final studentDoc = await FirebaseFirestore.instance.collection('users').doc(studentId).get();
+                    final senderName = studentDoc.data()?['name'] ?? 'Student';
 
                     // Create or get chat room between this student, landlord and property
                     final chatService = ChatService();
@@ -259,6 +260,9 @@ class ViewPage extends StatelessWidget {
                         builder: (_) => ChatPage(
                           chatRoomId: chatRoomId,
                           currentUserId: studentId,
+                          recipientId: landlordId,
+                          senderName: senderName,
+                          propertyId: propertyId,
                         ),
                       ),
                     );

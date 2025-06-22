@@ -19,6 +19,30 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
+  String? _currentUserName;
+  bool _loadingUserName = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUserName();
+  }
+
+  Future<void> _fetchCurrentUserName() async {
+    final String landlordId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (landlordId.isNotEmpty) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(landlordId).get();
+      setState(() {
+        _currentUserName = userDoc.data()?['name'] ?? "Landlord";
+        _loadingUserName = false;
+      });
+    } else {
+      setState(() {
+        _currentUserName = "Landlord";
+        _loadingUserName = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -80,13 +104,19 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
   Widget build(BuildContext context) {
     final String landlordId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
+    if (_loadingUserName) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final List<Widget> _pages = [
       _buildHomeTab(context),
       const AddDormPage(),
-      // ChatListPage is just a widget, not a page/route!
       ChatListPage(
         currentUserId: landlordId,
         currentUserRole: 'landlord',
+        currentUserName: _currentUserName ?? "Landlord",
       ),
       const LandlordProfilePage(),
     ];
