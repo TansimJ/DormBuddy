@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './appbar.dart';
 import './viewproperty.dart';
+import './propertycard.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -15,26 +16,25 @@ class _SearchPageState extends State<SearchPage> {
       "id": 1,
       "name": "Sunny Apartment",
       "images": [
-    "lib/assets/images/property_outside.jpg",
-    "lib/assets/images/bedroom.jpg",
-    "lib/assets/images/room.jpg",
-  ],
+        "lib/assets/images/property_outside.jpg",
+        "lib/assets/images/bedroom.jpg",
+        "lib/assets/images/room.jpg",
+      ],
       "address": "123 College St, Apt 1",
       "postedBy": "Liam K.",
       "description": "Cozy apartment near campus with great amenities",
       "dormType": "Shared",
       "gender": "Women",
       "price": 400,
-      
     },
     {
       "id": 2,
       "name": "Cassie Complex",
       "images": [
-    "lib/assets/images/property_outside.jpg",
-    "lib/assets/images/bedroom.jpg",
-    "lib/assets/images/room.jpg",
-  ],
+        "lib/assets/images/property_outside.jpg",
+        "lib/assets/images/bedroom.jpg",
+        "lib/assets/images/room.jpg",
+      ],
       "address": "456 College St, Apt 4",
       "postedBy": "Brain Steel",
       "description": "Cozy apartment complex near campus safe from Diddy",
@@ -46,10 +46,10 @@ class _SearchPageState extends State<SearchPage> {
       "id": 3,
       "name": "Ling Gan Studio",
       "images": [
-    "lib/assets/images/property_outside.jpg",
-    "lib/assets/images/bedroom.jpg",
-    "lib/assets/images/room.jpg",
-  ],
+        "lib/assets/images/property_outside.jpg",
+        "lib/assets/images/bedroom.jpg",
+        "lib/assets/images/room.jpg",
+      ],
       "address": "Linggangguli 1, Apt 3",
       "postedBy": "Don Pollo",
       "description": "Waza apartment near campus with great guli",
@@ -61,10 +61,10 @@ class _SearchPageState extends State<SearchPage> {
       "id": 4,
       "name": "Windy Apartment",
       "images": [
-    "lib/assets/images/property_outside.jpg",
-    "lib/assets/images/bedroom.jpg",
-    "lib/assets/images/room.jpg",
-  ],
+        "lib/assets/images/property_outside.jpg",
+        "lib/assets/images/bedroom.jpg",
+        "lib/assets/images/room.jpg",
+      ],
       "address": "123 Ogga booga St, Apt 1",
       "postedBy": "Liam K.",
       "description": "Cozy apartment near campus with great amenities",
@@ -76,10 +76,10 @@ class _SearchPageState extends State<SearchPage> {
       "id": 5,
       "name": "Knee Surgery Apartment",
       "images": [
-    "lib/assets/images/property_outside.jpg",
-    "lib/assets/images/bedroom.jpg",
-    "lib/assets/images/room.jpg",
-  ],
+        "lib/assets/images/property_outside.jpg",
+        "lib/assets/images/bedroom.jpg",
+        "lib/assets/images/room.jpg",
+      ],
       "address": "234 Knee Surgery St, Apt 2",
       "postedBy": "Kevin the orthopedic surgeon",
       "description": "Cozy apartment near campus with great knee surgery",
@@ -95,10 +95,22 @@ class _SearchPageState extends State<SearchPage> {
   String selectedSort = 'None';
   String searchKeyword = '';
 
+  Set<int> likedProperties = {};
+
   @override
   void initState() {
     super.initState();
     filteredProperties = List.from(properties);
+  }
+
+  void toggleLike(int propertyId) {
+    setState(() {
+      if (likedProperties.contains(propertyId)) {
+        likedProperties.remove(propertyId);
+      } else {
+        likedProperties.add(propertyId);
+      }
+    });
   }
 
   void _applyFilters() {
@@ -216,48 +228,19 @@ class _SearchPageState extends State<SearchPage> {
                         ),
                       );
                     },
-                    child: Card(
-                      elevation: 2,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 160,
-                              width: double.infinity,
-                              color: Colors.grey[300],
-                              child: ClipRRect(
-                                //adding an image
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'lib/assets/images/property_outside.jpg', 
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              property['name'],
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(property['address']),
-                            const SizedBox(height: 4),
-                            Text(property['description']),
-                            const SizedBox(height: 4),
-                            Text("Gender Preference: ${property['gender']}"),
-                            const SizedBox(height: 4),
-                            Text("Dorm Type: ${property['dormType']}"),
-                            const SizedBox(height: 4),
-                            Text("Posted by: ${property['postedBy']}"),
-                            const SizedBox(height: 4),
-                            Text("Price: \$${property['price']}"),
-                          ],
-                        ),
-                      ),
+                    child: PropertyCard(
+                      property: {
+                        'dormitory_name': property['name'],
+                        'address_line': property['address'],
+                        'description': property['description'],
+                        'dormitory_type': property['dormType'],
+                        'gender_preference': property['gender'],
+                        'posted_by': property['postedBy'],
+                        'price': property['price'],
+                        'images': property['images'],
+                      },
+                      isLiked: likedProperties.contains(property['id']),
+                      onLikeToggle: () => toggleLike(property['id']),
                     ),
                   );
                 },
