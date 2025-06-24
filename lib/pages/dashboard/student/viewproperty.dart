@@ -138,7 +138,7 @@ class ViewPage extends StatelessWidget {
             FutureBuilder<DocumentSnapshot>(
               future: landlordId.isNotEmpty
                   ? FirebaseFirestore.instance.collection('users').doc(landlordId).get()
-                  : Future.value(null),
+                  : Future.value(null),// causing error 
               builder: (context, snapshot) {
                 String landlordName = 'Unknown';
                 if (snapshot.connectionState == ConnectionState.done && snapshot.hasData && snapshot.data != null) {
