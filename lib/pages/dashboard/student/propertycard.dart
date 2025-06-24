@@ -22,6 +22,7 @@ class _PropertyCardState extends State<PropertyCard> {
     _checkIfLiked();
   }
 
+// Checks if the property is liked by the current user
   Future<void> _checkIfLiked() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -54,6 +55,7 @@ class _PropertyCardState extends State<PropertyCard> {
         .collection('liked_properties')
         .doc(propertyId);
 
+// Toggle like status
     if (isLiked) {
       await ref.delete();
     } else {
@@ -100,6 +102,8 @@ class _PropertyCardState extends State<PropertyCard> {
                         : Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover),
                   ),
                 ),
+
+                // Like button overlay
                 Positioned(
                   top: 8,
                   right: 8,

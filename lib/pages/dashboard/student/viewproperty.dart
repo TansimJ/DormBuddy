@@ -7,25 +7,81 @@ import 'package:dorm_buddy/pages/chat/chat_page.dart';
 import 'package:dorm_buddy/services/chat_service.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ViewPage extends StatelessWidget {
+class ViewPage extends StatefulWidget {
   final Map<String, dynamic> property;
 
   const ViewPage({super.key, required this.property});
 
   @override
+  State<ViewPage> createState() => _ViewPageState();
+}
+
+class _ViewPageState extends State<ViewPage> {
+  bool isLiked = false;
+  bool likeLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfLiked();
+  }
+
+  Future<void> _checkIfLiked() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final propertyId = widget.property['id'] ?? '';
+    if (propertyId == '') return;
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('liked_properties')
+        .doc(propertyId)
+        .get();
+    setState(() {
+      isLiked = doc.exists;
+    });
+  }
+
+  Future<void> _toggleLike() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final propertyId = widget.property['id'] ?? '';
+    if (propertyId == '') return;
+
+    setState(() {
+      likeLoading = true;
+    });
+
+    final ref = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('liked_properties')
+        .doc(propertyId);
+
+    if (isLiked) {
+      await ref.delete();
+    } else {
+      await ref.set({'likedAt': FieldValue.serverTimestamp()});
+    }
+    setState(() {
+      isLiked = !isLiked;
+      likeLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Helper function to format price
+    final property = widget.property;
+    final List images = (property['images'] is List) ? property['images'] : [];
+    final String? mainImage = images.isNotEmpty ? images[0] : null;
+    final String landlordId = property['landlordId'] ?? '';
+
     String formatPrice(dynamic price) {
       if (price == null) return 'RM -/month';
       if (price is int) return 'RM $price/month';
       if (price is double) return 'RM ${price.toStringAsFixed(2)}/month';
       return 'RM $price/month';
     }
-
-    // Get image list from Firestore
-    final List images = (property['images'] is List) ? property['images'] : [];
-    final String? mainImage = images.isNotEmpty ? images[0] : null;
-    final String landlordId = property['landlordId'] ?? '';
 
     return Scaffold(
       appBar: const StudentNavBar(),
@@ -35,7 +91,7 @@ class ViewPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image with floating button
+              // Image Section
               Stack(
                 children: [
                   Container(
@@ -52,7 +108,7 @@ class ViewPage extends StatelessWidget {
                           : Image.asset('lib/assets/images/property_outside.jpg', fit: BoxFit.cover),
                     ),
                   ),
-                  // Share icon at the left
+                  // Share Icon
                   Positioned(
                     top: 12,
                     left: 12,
@@ -74,7 +130,7 @@ class ViewPage extends StatelessWidget {
                       },
                     ),
                   ),
-                  // "See all Photos" button at the right
+                  // See All Photos
                   Positioned(
                     top: 12,
                     right: 12,
@@ -111,18 +167,40 @@ class ViewPage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Property Name
-              Text(
-                property['dormitory_name']?.toString() ?? 'PROPERTY NAME',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              // Property Title + Like Button
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      property['dormitory_name']?.toString() ?? 'PROPERTY NAME',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (likeLoading)
+                    const SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    IconButton(
+                      icon: Icon(
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: isLiked ? Colors.red : Colors.grey[600],
+                        size: 28,
+                      ),
+                      onPressed: _toggleLike,
+                    ),
+                ],
               ),
 
               const SizedBox(height: 12),
 
-              // Gender & Dorm Type Pills
+              // Gender & Dorm Type
               Row(
                 children: [
                   Chip(
@@ -145,7 +223,7 @@ class ViewPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Address with icon
+              // Address
               Row(
                 children: [
                   const Icon(Icons.location_on, color: Color(0xFF800000)),
@@ -161,7 +239,7 @@ class ViewPage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Posted by section (show landlord name)
+              // Landlord Info
               FutureBuilder<DocumentSnapshot>(
                 future: landlordId.isNotEmpty
                     ? FirebaseFirestore.instance.collection('users').doc(landlordId).get()
@@ -189,46 +267,36 @@ class ViewPage extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 4),
 
               const Divider(height: 40, thickness: 1),
 
-              // Description section
+              // Description
               const Text(
                 'Description',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Text(
                 property['description']?.toString() ?? 'No description provided.',
-                style: const TextStyle(
-                  fontSize: 16,
-                  height: 1.5,
-                ),
+                style: const TextStyle(fontSize: 16, height: 1.5),
               ),
 
               const Divider(height: 40, thickness: 1),
 
-              // Price and action button
+              // Price
               const Text(
                 'Price',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Text(
                 formatPrice(property['monthly_rate_(rm)']),
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
+
               const SizedBox(height: 40),
+
+              // Chat Owner Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -241,11 +309,10 @@ class ViewPage extends StatelessWidget {
                       );
                       return;
                     }
-                    // Fetch sender (student) name from Firestore
+
                     final studentDoc = await FirebaseFirestore.instance.collection('users').doc(studentId).get();
                     final senderName = studentDoc.data()?['name'] ?? 'Student';
 
-                    // Create or get chat room between this student, landlord and property
                     final chatService = ChatService();
                     final String chatRoomId = await chatService.getOrCreateChatRoom(
                       studentId: studentId,
@@ -253,7 +320,6 @@ class ViewPage extends StatelessWidget {
                       propertyId: propertyId,
                     );
 
-                    // Navigate to the chat page for this room
                     Navigator.push(
                       context,
                       MaterialPageRoute(
