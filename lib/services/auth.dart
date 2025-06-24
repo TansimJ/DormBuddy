@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -29,7 +30,7 @@ class AuthService {
 
       await userCredential.user!.updateDisplayName(name.trim());
 
-      print("Saving user data to Firestore...");
+      developer.log("Saving user data to Firestore...", name: 'AuthService');
 
 // Write user data to Firestore
 //some of this is for profile
@@ -45,14 +46,14 @@ class AuthService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print("User data saved to Firestore successfully.");
+      developer.log("User data saved to Firestore successfully.", name: 'AuthService');
 
       return null; // ✅ Registration and Firestore write both succeeded
     } on FirebaseAuthException catch (e) {
-      print("FirebaseAuth error: ${e.message}");
+      developer.log("FirebaseAuth error: ${e.message}", name: 'AuthService', error: e);
       return e.message ?? 'An auth error occurred';
     } catch (e) {
-      print("Unexpected error: $e");
+      developer.log("Unexpected error: $e", name: 'AuthService', error: e);
       return 'Something went wrong. Please try again.';
     }
   }

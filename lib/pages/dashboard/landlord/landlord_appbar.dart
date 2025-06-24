@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:badges/badges.dart' as badges;
 
 class LandlordAppBar extends StatelessWidget implements PreferredSizeWidget {
   const LandlordAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return AppBar(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -28,12 +32,47 @@ class LandlordAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       leading: null,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications, color: Colors.white),
-          onPressed: () {
-            // Handle notification
-          },
-        ),
+        // Notification Icon with Badge
+        if (user != null)
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .collection('notifications')
+                .where('isRead', isEqualTo: false)
+                .snapshots(),
+            builder: (context, snapshot) {
+              int unreadCount = 0;
+              if (snapshot.hasData) {
+                unreadCount = snapshot.data!.docs.length;
+              }
+              return IconButton(
+                icon: badges.Badge(
+                  showBadge: unreadCount > 0,
+                  badgeContent: unreadCount > 0
+                      ? Text(
+                          unreadCount.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                        )
+                      : null,
+                  child: const Icon(Icons.notifications, color: Colors.white),
+                  badgeStyle: badges.BadgeStyle(
+                    badgeColor: Colors.blue, // blue for visibility
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/notification');
+                },
+              );
+            },
+          )
+        else
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: () {
+              Navigator.pushNamed(context, '/notification');
+            },
+          ),
         IconButton(
           icon: const Icon(Icons.logout, color: Colors.white),
           onPressed: () => Navigator.pushNamedAndRemoveUntil(

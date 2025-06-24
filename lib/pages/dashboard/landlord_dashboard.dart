@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'landlord/landlord_appbar.dart';
 import 'landlord/landlord_bottombar.dart';
+import 'landlord/add_dorm.dart';
+import '../chat/chat_list_page.dart';
+import 'landlord/landlord_profile.dart';
 
 class LandlordDashboard extends StatefulWidget {
   const LandlordDashboard({super.key});
@@ -14,31 +19,35 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
+  String? _currentUserName;
+  bool _loadingUserName = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUserName();
+  }
+
+  Future<void> _fetchCurrentUserName() async {
+    final String landlordId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (landlordId.isNotEmpty) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(landlordId).get();
+      setState(() {
+        _currentUserName = userDoc.data()?['name'] ?? "Landlord";
+        _loadingUserName = false;
+      });
+    } else {
+      setState(() {
+        _currentUserName = "Landlord";
+        _loadingUserName = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-    switch (index) {
-      case 0:
-        Navigator.pushNamed(context, '/landlord_dashboard');
-        break;
-      case 1:
-        Navigator.pushNamed(context, '/add_dorm');
-        break;
-      case 2:
-        Navigator.pushNamed(context, '/landlord_chat');
-        break;
-      case 3:
-        Navigator.pushNamed(context, '/landlord_profile');
-        break;
-    }
   }
 
   void _onSearch() {
@@ -47,55 +56,83 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     });
   }
 
+  Widget _buildHomeTab(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTopHeader(context),
+          const SizedBox(height: 24),
+          _buildSearchBar(context),
+          const SizedBox(height: 18),
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('dorms').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.only(top: 40),
+                  child: Center(child: Text('No properties found.', style: TextStyle(fontSize: 16))),
+                );
+              }
+              final properties = snapshot.data!.docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                data['id'] = doc.id;
+                return data;
+              }).where((property) {
+                if (_searchQuery.isEmpty) return true;
+                final name = (property['dormitory_name'] ?? '').toLowerCase();
+                final address = (property['address_line'] ?? '').toLowerCase();
+                final description = (property['description'] ?? '').toLowerCase();
+                return name.contains(_searchQuery) ||
+                    address.contains(_searchQuery) ||
+                    description.contains(_searchQuery);
+              }).toList();
+
+              return _buildPropertiesList(properties);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String landlordId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    if (_loadingUserName) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final List<Widget> _pages = [
+      _buildHomeTab(context),
+      const AddDormPage(),
+      ChatListPage(
+        currentUserId: landlordId,
+        currentUserRole: 'landlord',
+        currentUserName: _currentUserName ?? "Landlord",
+      ),
+      const LandlordProfilePage(),
+    ];
+
     return Scaffold(
       appBar: const LandlordAppBar(),
       backgroundColor: const Color(0xFFF9F9F9),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTopHeader(context),
-            const SizedBox(height: 24),
-            _buildSearchBar(context),
-            const SizedBox(height: 18),
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('dorms').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.only(top: 40),
-                    child: Center(child: Text('No properties found.', style: TextStyle(fontSize: 16))),
-                  );
-                }
-                final properties = snapshot.data!.docs.map((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  data['id'] = doc.id;
-                  return data;
-                }).where((property) {
-                  if (_searchQuery.isEmpty) return true;
-                  final name = (property['dormitory_name'] ?? '').toLowerCase();
-                  final address = (property['address_line'] ?? '').toLowerCase();
-                  final description = (property['description'] ?? '').toLowerCase();
-                  return name.contains(_searchQuery) ||
-                      address.contains(_searchQuery) ||
-                      description.contains(_searchQuery);
-                }).toList();
-
-                return _buildPropertiesList(properties);
-              },
-            ),
-          ],
-        ),
-      ),
+      body: _pages[_currentIndex],
       bottomNavigationBar: LandlordBottomBar(
         currentIndex: _currentIndex,
-        onTap: _onItemTapped,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+            if (_currentIndex != 0) _searchController.clear();
+          });
+        },
       ),
     );
   }
@@ -104,7 +141,6 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Replace with landlord's profile image if available
         CircleAvatar(
           radius: 30,
           backgroundColor: const Color(0xFF800000),
@@ -114,17 +150,17 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Welcome, User!',
-                style: TextStyle(
+                'Welcome, ${_currentUserName ?? 'Landlord'}!',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
                 ),
               ),
-              SizedBox(height: 6),
-              Text(
+              const SizedBox(height: 6),
+              const Text(
                 'Manage your properties easily and efficiently.',
                 style: TextStyle(fontSize: 15, color: Colors.black87),
               ),
@@ -225,7 +261,6 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: imageUrl != null && imageUrl.isNotEmpty
@@ -251,12 +286,10 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                       ),
               ),
               const SizedBox(width: 16),
-              // Info and actions
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title and status
                     Row(
                       children: [
                         Expanded(
@@ -309,7 +342,6 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 5),
-                    // Extra info
                     Row(
                       children: [
                         if (property['num_beds'] != null)
