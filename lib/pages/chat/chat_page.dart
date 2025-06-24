@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/chat_message.dart';
 import '../../services/chat_service.dart';
@@ -61,13 +62,24 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.senderName,
+         title: FutureBuilder<DocumentSnapshot>(
+    future: FirebaseFirestore.instance.collection('users').doc(widget.recipientId).get(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Text('Loading...');
+      }
+      if (snapshot.hasData && snapshot.data!.exists) {
+        return Text(
+          snapshot.data!.get('name') ?? 'Unknown',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
-        ),
+        );
+      }
+      return const Text('Unknown');
+    },
+  ),
         backgroundColor: const Color(0xFF800000),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
