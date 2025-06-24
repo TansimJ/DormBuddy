@@ -1,4 +1,6 @@
+import 'package:dorm_buddy/pages/dashboard/student/liked_properties_page.dart';
 import 'package:dorm_buddy/pages/dashboard/student/viewproperty.dart';
+import 'package:dorm_buddy/pages/dashboard/student/propertycard.dart';
 import 'package:flutter/material.dart';
 import './student/appbar.dart';
 import './student/bottombar.dart';
@@ -30,7 +32,11 @@ class _StudentDashboardState extends State<StudentDashboard> {
   Future<void> _fetchCurrentUserName() async {
     final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
     if (currentUserId.isNotEmpty) {
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUserId).get();
+      final userDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUserId)
+              .get();
       setState(() {
         _currentUserName = userDoc.data()?['name'] ?? "Student";
         _loadingUserName = false;
@@ -45,183 +51,208 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   // Dashboard Home Page (Search tab)
   Widget _buildHomePage() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Welcome, User!',
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      children: [
+        // Enhanced Welcome Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color.fromARGB(255, 246, 231, 231),
+                const Color.fromARGB(255, 233, 196, 196).withOpacity(0.3),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color.fromARGB(255, 107, 3, 3).withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          const Text('Looking for a place? Start here!'),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SearchPage()),
-              );
-            },
-            child: AbsorbPointer(
-              child: TextField(
-                readOnly: true,
-                decoration: InputDecoration(
-                  hintText: 'Search for an apartment...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(
+                        255,
+                        114,
+                        19,
+                        19,
+                      ).withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
+                child: Icon(
+                  Icons.home_rounded,
+                  color: const Color.fromARGB(255, 122, 15, 15),
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome back,',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: const Color.fromARGB(255, 102, 10, 10),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _currentUserName ?? 'Student',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 94, 8, 8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Search Bar
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SearchPage()),
+            );
+          },
+          child: AbsorbPointer(
+            child: TextField(
+              readOnly: true,
+              decoration: InputDecoration(
+                hintText: 'Search for apartments, dorms...',
+                hintStyle: TextStyle(color: Colors.grey.shade600),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: const Color.fromARGB(255, 95, 10, 10),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
           ),
-          const SizedBox(height: 30),
-          const Text(
-            'Recently Published:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 30),
+
+        // Recently Published Section
+        const Text(
+          'Recently Published:',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
-          const SizedBox(height: 16),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('dorms')
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Text('No properties found.');
-              }
-              final properties = snapshot.data!.docs.map((doc) {
-                final data = doc.data() as Map<String, dynamic>;
-                data['id'] = doc.id;
-                return data;
-              }).toList();
-
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: properties.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.75,
-                ),
-                itemBuilder: (context, index) {
-                  final property = properties[index];
-                  final List images = (property['images'] is List) ? property['images'] : [];
-                  final String? imageUrl = (images.isNotEmpty && images[0] != null && images[0].toString().isNotEmpty)
-                      ? images[0]
-                      : null;
-
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ViewPage(property: property),
-                        ),
-                      );
-                    },
-                    child: Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 100,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: imageUrl != null
-                                    ? Image.network(
-                                        imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (
-                                          context,
-                                          error,
-                                          stackTrace,
-                                        ) {
-                                          return Image.asset(
-                                            'lib/assets/images/property_outside.jpg',
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      )
-                                    : Image.asset(
-                                        'lib/assets/images/property_outside.jpg',
-                                        fit: BoxFit.cover,
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              property['dormitory_name'] ?? 'No Name',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              property['address_line'] ?? '',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            const Spacer(),
-                            Text(
-                              "RM${property['monthly_rate_(rm)'] ?? '-'} /month",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+        ),
+        const SizedBox(height: 16),
+        StreamBuilder<QuerySnapshot>(
+          stream:
+              FirebaseFirestore.instance
+                  .collection('dorms')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Text('No properties found.'),
               );
-            },
-          ),
-          const SizedBox(height: 80),
-        ],
-      ),
+            }
+            final properties =
+                snapshot.data!.docs.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  data['id'] = doc.id;
+                  return data;
+                }).toList();
+
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: properties.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.66,
+              ),
+              itemBuilder: (context, index) {
+                final property = properties[index];
+                return PropertyCard(
+                  property: property,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ViewPage(property: property),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 80),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the current Firebase user ID for chat
     final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
 
-    // Wait until username is loaded
     if (_loadingUserName) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: const Color.fromARGB(255, 168, 45, 45)),
+              const SizedBox(height: 20),
+              Text(
+                'Loading your dashboard...',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
-    // Pages for bottom navigation bar
     final List<Widget> _pages = [
       _buildHomePage(),
+      LikedPropertiesPage(),
       ForumPage(),
       ChatListPage(
         currentUserId: currentUserId,
@@ -232,6 +263,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: const StudentNavBar(),
       body: _pages[_currentIndex],
       bottomNavigationBar: Bottombar(
