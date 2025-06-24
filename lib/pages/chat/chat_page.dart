@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/chat_message.dart';
 import '../../services/chat_service.dart';
@@ -46,7 +45,8 @@ class _ChatPageState extends State<ChatPage> {
   void _markMessagesAsRead() async {
     final messages = await _chatService.getMessagesOnce(widget.chatRoomId);
     for (final msg in messages) {
-      if (msg.senderId != widget.currentUserId && (msg.read == false || msg.read == null)) {
+      if (msg.senderId != widget.currentUserId &&
+          (msg.read == false || msg.read == null)) {
         await _chatService.markMessageAsRead(widget.chatRoomId, msg.id);
       }
     }
@@ -62,32 +62,16 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-         title: FutureBuilder<DocumentSnapshot>(
-    future: FirebaseFirestore.instance.collection('users').doc(widget.recipientId).get(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Text('Loading...');
-      }
-      if (snapshot.hasData && snapshot.data!.exists) {
-        return Text(
-          snapshot.data!.get('name') ?? 'Unknown',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        );
-      }
-      return const Text('Unknown');
-    },
-  ),
+        title: const Text(
+          'Chat',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF800000),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(16),
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
       ),
       body: Container(
@@ -95,10 +79,7 @@ class _ChatPageState extends State<ChatPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF9F9F9),
-              Color(0xFFF0F0F0),
-            ],
+            colors: [Color(0xFFF9F9F9), Color(0xFFF0F0F0)],
           ),
         ),
         child: SafeArea(
@@ -140,7 +121,10 @@ class _ChatPageState extends State<ChatPage> {
               // Message input area - now properly centered
               Container(
                 margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -153,11 +137,14 @@ class _ChatPageState extends State<ChatPage> {
                   ],
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center, // Ensures vertical centering
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center, // Ensures vertical centering
                   children: [
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4), // Added vertical padding
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4,
+                        ), // Added vertical padding
                         child: TextField(
                           controller: _controller,
                           maxLines: 3,
@@ -170,9 +157,7 @@ class _ChatPageState extends State<ChatPage> {
                               vertical: 12, // Adjusted for better centering
                             ),
                             hintText: 'Message ${widget.senderName}...',
-                            hintStyle: TextStyle(
-                              color: Colors.grey.shade500,
-                            ),
+                            hintStyle: TextStyle(color: Colors.grey.shade500),
                             border: InputBorder.none,
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -184,16 +169,14 @@ class _ChatPageState extends State<ChatPage> {
                               },
                             ),
                           ),
-                          style: const TextStyle(
-                            fontSize: 16,
-                          ),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       height: 48, // Fixed height to match text field
-                      width: 48,  // Fixed width for consistency
+                      width: 48, // Fixed width for consistency
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFFA00000), Color(0xFF800000)],

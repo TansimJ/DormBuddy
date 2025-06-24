@@ -24,11 +24,12 @@ class LikedPropertiesPage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(currentUser.uid)
-            .collection('liked_properties')
-            .snapshots(),
+        stream:
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUser.uid)
+                .collection('liked_properties')
+                .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -52,9 +53,10 @@ class LikedPropertiesPage extends StatelessWidget {
               if (!propertySnap.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final propertyDocs = propertySnap.data!
-                  .where((doc) => doc.exists && doc.data() != null)
-                  .toList();
+              final propertyDocs =
+                  propertySnap.data!
+                      .where((doc) => doc.exists && doc.data() != null)
+                      .toList();
               if (propertyDocs.isEmpty) {
                 return const Center(child: Text('No liked properties found.'));
               }
@@ -69,7 +71,8 @@ class LikedPropertiesPage extends StatelessWidget {
                   childAspectRatio: 0.66,
                 ),
                 itemBuilder: (context, index) {
-                  final data = propertyDocs[index].data() as Map<String, dynamic>;
+                  final data =
+                      propertyDocs[index].data() as Map<String, dynamic>;
                   data['id'] = propertyDocs[index].id;
                   return PropertyCard(
                     property: data,
