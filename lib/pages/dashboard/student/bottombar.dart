@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Bottombar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
-
+  
   const Bottombar({
     super.key,
     required this.currentIndex,
@@ -18,11 +18,7 @@ class Bottombar extends StatelessWidget {
           icon: Icon(Icons.search),
           label: 'Search',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_border),
-          activeIcon: Icon(Icons.favorite),
-          label: 'Liked',
-        ),
+        //removed likes
         BottomNavigationBarItem(
           icon: Icon(Icons.people_outline),
           activeIcon: Icon(Icons.people),
