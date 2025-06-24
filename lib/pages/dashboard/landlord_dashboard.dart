@@ -150,17 +150,17 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Welcome, User!',
-                style: TextStyle(
+                'Welcome, ${_currentUserName ?? 'Landlord'}!',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
                 ),
               ),
-              SizedBox(height: 6),
-              Text(
+              const SizedBox(height: 6),
+              const Text(
                 'Manage your properties easily and efficiently.',
                 style: TextStyle(fontSize: 15, color: Colors.black87),
               ),
