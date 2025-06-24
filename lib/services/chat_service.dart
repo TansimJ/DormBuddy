@@ -26,6 +26,7 @@ class ChatService {
         'landlordId': landlordId,
         'studentId': studentId,
         'propertyId': propertyId,
+        'createdAt': FieldValue.serverTimestamp(),
       });
       return docRef.id;
     }
@@ -46,8 +47,12 @@ class ChatService {
   Future<void> sendMessage({
     required String chatRoomId,
     required String senderId,
+    required String recipientId,   // <-- Pass this when calling
+    required String senderName,     // <-- Pass this when calling
     required String message,
+    String? propertyId,             // <-- optional
   }) async {
+    // Send the chat message
     await _firestore
         .collection('chat_rooms')
         .doc(chatRoomId)
@@ -56,6 +61,22 @@ class ChatService {
       'senderId': senderId,
       'text': message,
       'timestamp': FieldValue.serverTimestamp(),
+      'read': false,
+    });
+
+    // Also create a notification for the recipient
+    await _firestore
+        .collection('users')
+        .doc(recipientId)
+        .collection('notifications')
+        .add({
+      'type': 'message',
+      'title': 'New message from $senderName',
+      'body': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'isRead': false,
+      'chatRoomId': chatRoomId,
+      if (propertyId != null) 'propertyId': propertyId,
     });
   }
 
@@ -71,12 +92,12 @@ class ChatService {
             .toList());
   }
 
-    Future<String> getOrCreateChatRoom({
+  Future<String> getOrCreateChatRoom({
     required String studentId,
     required String landlordId,
     required String propertyId,
   }) async {
-    final chatRooms = await FirebaseFirestore.instance
+    final chatRooms = await _firestore
         .collection('chat_rooms')
         .where('studentId', isEqualTo: studentId)
         .where('landlordId', isEqualTo: landlordId)
@@ -88,12 +109,32 @@ class ChatService {
     }
 
     // Create new chat room
-    final docRef = await FirebaseFirestore.instance.collection('chat_rooms').add({
+    final docRef = await _firestore.collection('chat_rooms').add({
       'studentId': studentId,
       'landlordId': landlordId,
       'propertyId': propertyId,
       'createdAt': FieldValue.serverTimestamp(),
     });
     return docRef.id;
+  }
+
+  Future<List<ChatMessage>> getMessagesOnce(String chatRoomId) async {
+    final snapshot = await _firestore
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .get();
+    return snapshot.docs
+        .map((doc) => ChatMessage.fromMap(doc.data(), doc.id))
+        .toList();
+  }
+
+  Future<void> markMessageAsRead(String chatRoomId, String messageId) async {
+    await _firestore
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .doc(messageId)
+        .update({'read': true});
   }
 }

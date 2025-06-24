@@ -143,6 +143,8 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
                         role: 'student', // hardcoded role
                       );
 
+                      if (!mounted) return; // <-- Guard against using context after async
+
                       if (result == null) {
                         // Registration successful
                         ScaffoldMessenger.of(context).showSnackBar(

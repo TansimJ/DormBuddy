@@ -18,6 +18,30 @@ class StudentDashboard extends StatefulWidget {
 
 class _StudentDashboardState extends State<StudentDashboard> {
   int _currentIndex = 0;
+  String? _currentUserName;
+  bool _loadingUserName = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUserName();
+  }
+
+  Future<void> _fetchCurrentUserName() async {
+    final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
+    if (currentUserId.isNotEmpty) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUserId).get();
+      setState(() {
+        _currentUserName = userDoc.data()?['name'] ?? "Student";
+        _loadingUserName = false;
+      });
+    } else {
+      setState(() {
+        _currentUserName = "Student";
+        _loadingUserName = false;
+      });
+    }
+  }
 
   // Dashboard Home Page (Search tab)
   Widget _buildHomePage() {
@@ -188,6 +212,13 @@ class _StudentDashboardState extends State<StudentDashboard> {
     // Get the current Firebase user ID for chat
     final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
 
+    // Wait until username is loaded
+    if (_loadingUserName) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     // Pages for bottom navigation bar
     final List<Widget> _pages = [
       _buildHomePage(),
@@ -195,6 +226,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
       ChatListPage(
         currentUserId: currentUserId,
         currentUserRole: 'student',
+        currentUserName: _currentUserName ?? "Student",
       ),
       const StudentProfilePage(),
     ];

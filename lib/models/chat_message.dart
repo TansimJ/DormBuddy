@@ -5,12 +5,15 @@ class ChatMessage {
   final String senderId;
   final String text;
   final Timestamp timestamp;
+  final bool? read;
+
 
   ChatMessage({
     required this.id,
     required this.senderId,
     required this.text,
     required this.timestamp,
+    this.read,
   });
 
   factory ChatMessage.fromMap(Map<String, dynamic> map, String id) {
@@ -19,6 +22,7 @@ class ChatMessage {
       senderId: map['senderId'],
       text: map['text'],
       timestamp: map['timestamp'],
+      read: map['read'] is bool ? map['read'] : false, 
     );
   }
 

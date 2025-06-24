@@ -10,6 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  flutter_local_notifications: ^17.1.2
+  shared_preferences: ^2.2.2
+  share_plus: ^7.2.1
 
   image_picker: ^1.1.2
   #Change 5
@@ -17,6 +20,7 @@ dependencies:
   firebase_auth: ^4.17.8
   cloud_firestore: ^4.15.9
   http: ^1.2.1
+  badges: ^3.1.2
 
 
 dev_dependencies:
